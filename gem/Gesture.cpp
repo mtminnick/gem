@@ -1,64 +1,40 @@
+#include <iostream>
 #include "Gesture.h"
 
-// todo: templetize these and make them variadic
+using std::cout;
+using std::endl;
 
-Gesture make_gesture(int v1, int v2)
-{
-	Gesture g;
-	g.push_back(v1);
-	g.push_back(v2);
-	return g;
-}
+// todo: templatize these and make them variadic
 
-ParamBlock make_param_block(Gesture rhythm, Gesture pitches)
+Gesture make_gesture(int v1, int v2, int v3)
 {
-	ParamBlock pb;
-	pb.push_back(rhythm);
-	pb.push_back(pitches);
-	return pb;
-}
-
-Voice make_voice(ParamBlock pb1, ParamBlock pb2)
-{
-	Voice v;
-	v.push_back(pb1);
-	v.push_back(pb2);
-	return v;
-}
-
-Piece make_piece(Voice v1, Voice v2)
-{
-	Piece p;
-	p.push_back(v1);
-	p.push_back(v2);
-	return p;
-}
-
-#if 0
-Gesture make_gesture(double v1, double v2)
-{
-	// change to variadic
 	Gesture g;
 	g += v1;
 	g += v2;
+	g += v3;
 	return g;
 }
 
 ParamBlock make_param_block(Gesture rhythm, Gesture pitches)
 {
-	// change to take all gesture in constructor instead of Set
 	ParamBlock pb;
-	pb.SetRhythmGesture(rhythm);
-	pb.SetPitchGesture(pitches);
+	pb += rhythm;
+	pb += pitches;
 	return pb;
 }
 
-Phrase make_phrase(ParamBlock pb)
+Voice make_voice(int instrument, ParamBlock pb1)
 {
-	// Change to variadic and change Set to Add
-	Phrase ph;
-	ph.SetParamBlock(pb);
-	return ph;
+	Voice v{instrument};
+	v += pb1;
+	return v;
+}
+
+Piece make_piece(Voice v1)
+{
+	Piece p;
+	p.push_back(v1);
+	return p;
 }
 
 //
@@ -74,40 +50,13 @@ void Gesture::Dump() const
 	cout << endl;
 }
 
-double Gesture::Next()
+int Gesture::Next(int& idx) const
 {
-	// fixme: use iterator?
-	if (m_next_index >= m_values.size())
+	// todo: use iterator
+	if (idx >= m_values.size())
 	{
-		Reset();
+		idx = 0;
 	}
 
-	return m_values[m_next_index++];
+	return m_values[idx++];
 }
-
-//
-// ParamBlock implementation.
-//
-
-void ParamBlock::Play()
-{
-	// Rhythm gesture drives the output.
-	// Run through rhythm gesture one time.
-	// Other gestures may loop around or not get completely used.
-	for (size_t i = 0; i < m_rhythm_gesture.Size(); i++)
-	{
-		double dur = m_rhythm_gesture.Next();
-		if (dur <= 0.0)
-		{
-			// Negative value for duration is a rest - no other gestures are consumed.
-			cout << dur << endl;
-		}
-		else
-		{
-			cout << dur << "<" << m_pitch_gesture.Next() << ">" << endl;
-		}
-	}
-	m_rhythm_gesture.Reset();
-	m_pitch_gesture.Reset();
-}
-#endif

@@ -11,7 +11,7 @@ using std::this_thread::sleep_for;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 
-void test_note_on_off(MidiOut& mout)
+void test_note_on_off(MidiOut const& mout)
 {
     cout << "Starting MIDI out test" << endl;
 
@@ -31,7 +31,7 @@ void test_note_on_off(MidiOut& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_channels(MidiOut& mout)
+void test_channels(MidiOut const& mout)
 {
     cout << "Starting MIDI out test" << endl;
 
@@ -61,7 +61,7 @@ void test_channels(MidiOut& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_program_change(MidiOut& mout)
+void test_program_change(MidiOut const& mout)
 {
     cout << "Starting MIDI out test" << endl;
 
@@ -100,7 +100,7 @@ void test_program_change(MidiOut& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_polyphony(MidiOut& mout)
+void test_polyphony(MidiOut const& mout)
 {
     cout << "Starting MIDI out test" << endl;
 
@@ -170,7 +170,7 @@ void test_polyphony(MidiOut& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_parameters(MidiOut& mout)
+void test_parameters(MidiOut const& mout)
 {
     const int chan = 0;
     const int key = -1;
