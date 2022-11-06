@@ -1,6 +1,40 @@
+/*
+ * Copyright (c) 2022, Michael Minnick
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation are those
+ * of the authors and should not be interpreted as representing official policies,
+ * either expressed or implied, of the FreeBSD Project.
+ */
 #include <iostream>
+#include <chrono>
+#include <thread>
+#include <cstdlib>
 #include "Scheduler.h"
 
+using std::this_thread::sleep_for;
+using std::chrono::milliseconds;
+using std::abs;
 using std::cout;
 using std::endl;
 
@@ -57,11 +91,11 @@ void Scheduler::Play(MidiOut const& midi_out, Voice voice) const
 	for (auto pb : param_blocks)
 	{
 		cout << "Starting param block " << i++ << endl;
-		Play(midi_out, pb);
+		Play(midi_out, voice.GetVoiceNumber(), pb);
 	}
 }
 
-void Scheduler::Play(MidiOut const& midi_out, ParamBlock param_block) const
+void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
 	// Run through rhythm gesture one time.
@@ -72,19 +106,34 @@ void Scheduler::Play(MidiOut const& midi_out, ParamBlock param_block) const
 
 	int rhythm_index = 0;	// updated by Next() through reference
 	int pitch_index = 0;	// updated by Next() through reference
-	for (size_t i = 0; i < rhythm_gesture.Size(); i++)
+	int const max_dur = param_block.GetDuration();
+	int total_dur = 0;
+	while (total_dur < max_dur)
 	{
 		int dur = rhythm_gesture.Next(rhythm_index);
+		int absdur = abs(dur);
 		if (dur <= 0)
 		{
 			// Negative value for duration is a rest - no other gestures are consumed.
 			cout << dur << "<rest>" << endl;
+			sleep_for(milliseconds(absdur));
 		}
 		else
 		{
-			cout << dur << "<" << pitch_gesture.Next(pitch_index) << ">" << endl;
+			int pitch = pitch_gesture.Next(pitch_index);
+			cout << dur << "<" << pitch << ">" << endl;
+			// todo: get velocity from gesture
+			int const velocity = 24;
+			midi_out.NoteOn(voice_num, pitch, velocity);
+			sleep_for(milliseconds(dur));
+			midi_out.NoteOff(voice_num, pitch);
 		}
+		total_dur += absdur;
+		cout << "Total dur = " << total_dur << endl;
 	}
+
+	// Let things settle
+	sleep_for(milliseconds(1000));
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
@@ -106,10 +155,9 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		{
 			++chan;
 		}
-		if (chan >= max_chan)
+		if (chan > max_chan)
 		{
 			cout << "Warning: out of channels for voice " << j << endl;
-			break;
 		}
 		
 		cout << "Setting voice " << j << " to chan " << chan << endl;

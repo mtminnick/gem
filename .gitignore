@@ -1,3 +1,9 @@
+# Added
+.vs
+gem.vcxproj.filters
+gem.vcxproj.user
+x64
+
 # Prerequisites
 *.d
 
