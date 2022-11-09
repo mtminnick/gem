@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -26,13 +27,10 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
-#pragma once
+
 #include <vector>
 
-// todo: these classes are similar enough they could probably be templatized.
-// todo: could make refs to these return ref to vector, then don't need Size() or vector getters,
-// and/or possibly return an iterator instead of the whole vector
-// and/or possibly implement a Next() like Gesture
+// todo: cleanup unneeded member funcs and constructors.
 
 class Gesture
 {
@@ -40,6 +38,8 @@ private:
 	std::vector<int> m_values;
 
 public:
+	Gesture(std::vector<int> values) : m_values(values) {}
+	Gesture() {};
 	void AddValue(int val) { m_values.push_back(val); }
 	// todo: consider returning an iterator
 	int Next(int& idx) const;
@@ -56,7 +56,9 @@ private:
 	int m_duration;
 
 public:
+	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration(duration), m_gestures(gestures) {}
 	ParamBlock(int duration) : m_duration(duration) {}
+	ParamBlock() : m_duration(0) {};
 	void AddGesture(Gesture g) { m_gestures.push_back(g); }
 	// todo: validate index in getters
 	// todo: use enum class not magic numbers
@@ -75,7 +77,9 @@ private:
 	int m_instrument_number;
 
 public:
+	Voice(int inst_num, std::vector<ParamBlock> param_blocks) : m_voice_number(0), m_instrument_number(inst_num), m_param_blocks(param_blocks) {}
 	Voice(int inst_num) : m_voice_number(0), m_instrument_number(inst_num) {}
+	Voice() : m_voice_number(0), m_instrument_number(0) {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
 	void SetVoiceNumber(int num) { m_voice_number = num; }
 	int GetVoiceNumber() const { return m_voice_number; }
@@ -85,10 +89,34 @@ public:
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }
 };
 
-typedef std::vector<Voice> Piece;			// A Piece is a vertical collection of Voices
+// A Piece is a vertical collection of Voices
+typedef std::vector<Voice> Piece;
 
-// todo: templatize these and make them variadic
-Gesture make_gesture(int v1, int v2, int v3);
-ParamBlock make_param_block(int duration, Gesture rhythm, Gesture pitches);
-Voice make_voice(int instrument, ParamBlock pb1);
-Piece make_piece(Voice v1);
+//
+// Global variadic template functions to make gestures, parameter blocks, voices and pieces.
+//
+
+template<typename ... Ts>
+Gesture make_gesture(Ts... params)
+{
+    return Gesture{ std::vector<int>{ params... } };
+}
+
+template<typename ... Ts>
+ParamBlock make_param_block(int duration, Ts... params)
+{
+	return ParamBlock{ duration, std::vector<Gesture>{ params... } };
+}
+
+template<typename ... Ts>
+Voice make_voice(int instrument, Ts... params)
+{
+	return Voice{ instrument, std::vector<ParamBlock>{ params... } };
+}
+
+template<typename ... Ts>
+Piece make_piece(Ts... params)
+{
+	return std::vector<Voice>{ params... };
+}
+

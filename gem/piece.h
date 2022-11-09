@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -27,44 +28,7 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
-#include <iostream>
-#include <cstdlib>
-#include "Gesture.h"
+#include "MidiOut.h"
 
-using std::cout;
-using std::endl;
-using std::abs;
-
-//
-// Gesture implementation.
-//
-
-int Gesture::AbsSum() const
-{
-	int total = 0;
-	for (auto val : m_values)
-	{
-		total += abs(val);
-	}
-	return total;
-}
-
-void Gesture::Dump() const
-{
-	for (auto val : m_values)
-	{
-		cout << val << " ";
-	}
-	cout << endl;
-}
-
-int Gesture::Next(int& idx) const
-{
-	// todo: use iterator
-	if (idx >= m_values.size())
-	{
-		idx = 0;
-	}
-
-	return m_values[idx++];
-}
+int piece1(MidiOut& midi_out);
+int piece2(MidiOut& midi_out);

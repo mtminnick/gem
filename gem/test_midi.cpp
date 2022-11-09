@@ -26,10 +26,14 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
+
 #include <iostream>
 #include <chrono>
 #include <thread>
 #include "test_midi.h"
+#include "Gesture.h"
+#include "Scheduler.h"
+#include "generalmidi.h"
 
 using std::cout;
 using std::endl;
@@ -207,4 +211,22 @@ void test_parameters(MidiOut const& mout)
     mout.NoteOn(chan, key, velocity);
     sleep_for(milliseconds(1000));
     mout.NoteOff(chan, key);
+}
+
+// Should sound like a single voice.
+void test_performance(MidiOut& midi_out)
+{
+	int const pb_total_time = 10000;
+
+	Gesture rhythm = make_gesture(1000, -500, 500);
+	Gesture pitch = make_gesture(c4, b4, a4);
+	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
+	Voice v1 = make_voice(acoustic_grand_piano, pb);
+
+	Voice v2 = make_voice(acoustic_grand_piano, pb);
+
+	Piece p = make_piece(v1, v2);
+
+	Scheduler s;
+    s.Play(midi_out, p);
 }

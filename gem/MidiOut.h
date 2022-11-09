@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -26,18 +27,15 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
-#pragma once
 
 #include <windows.h>
 #include <mmeapi.h>
-
-// todo: make thread safe
 
 class MidiOut
 {
 private:
 	UINT m_device_num = 0;
-	HMIDIOUT m_device_handle = 0;	// todo: init to invalid handle
+	HMIDIOUT m_device_handle = NULL;
 	bool m_is_device_open = false;
 
 	void SendMIDIEvent(BYTE status, BYTE data1, BYTE data2) const;

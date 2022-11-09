@@ -26,8 +26,11 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
-#include "MidiOut.h"
+
 #include <iostream>
+#include <mutex>
+#include "MidiOut.h"
+#include "generalmidi.h"
 
 using std::cout;
 using std::endl;
@@ -35,13 +38,14 @@ using std::wcout;
 using std::wcerr;
 using std::hex;
 using std::dec;
+using std::lock_guard;
+using std::mutex;
 
 // Requires:Winmm.lib
 
 // todo: consider using running status - no need to send status byte for sequences of all note-on/off.
 
-unsigned char const kNoteOn = 0x90;
-unsigned char const kProgramChange = 0xc0;
+std::mutex g_midi_out_mutex;  // protects device access
 
 MidiOut::MidiOut()
 {
@@ -142,7 +146,9 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2) const
     u.bData[2] = bData2;   // second MIDI data byte 
     u.bData[3] = 0;
 
-    // Send the message. 
+    const lock_guard<mutex> lock(g_midi_out_mutex);
+
+    // Send the message.
     MMRESULT mmr = midiOutShortMsg(m_device_handle, u.dwData);
     if (mmr != MMSYSERR_NOERROR)
     {

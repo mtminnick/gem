@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -131,13 +132,16 @@
     <ClCompile Include="gem.cpp" />
     <ClCompile Include="Gesture.cpp" />
     <ClCompile Include="MidiOut.cpp" />
+    <ClCompile Include="piece.cpp" />
     <ClCompile Include="Scheduler.cpp" />
     <ClCompile Include="test_gesture.cpp" />
     <ClCompile Include="test_midi.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="generalmidi.h" />
     <ClInclude Include="Gesture.h" />
     <ClInclude Include="MidiOut.h" />
+    <ClInclude Include="piece.h" />
     <ClInclude Include="Scheduler.h" />
     <ClInclude Include="test_gesture.h" />
     <ClInclude Include="test_midi.h" />

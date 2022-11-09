@@ -26,23 +26,22 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
+
 #include <iostream>
+#include <vector>
 #include <chrono>
 #include <thread>
 #include <cstdlib>
 #include "Scheduler.h"
+#include "generalmidi.h"
 
 using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::abs;
 using std::cout;
 using std::endl;
-
-// Play(piece) - send prog change for each voice, start thread for each voice
-// Play(voice) - call play() on each paramblock
-// Play(paramblock) - Run through rhythm gesture, send note on (if not rest), delay, send not off (if not rest)
-// 
-// Consider sending all prog changes first (first element of first gesture vector in each voice)
+using std::thread;
+using std::vector;
 
 // scheduler algo
 // start a thread for each voice
@@ -65,36 +64,6 @@ using std::endl;
 // When not in use (rest), channel should be deallocated.
 // Only send program change if needed.
 
-int Scheduler::Play(MidiOut const& midi_out, Piece piece) const
-{
-	cout << "Scheduler: running" << endl;
-
-	AllocateVoices(piece);
-	InitializeVoices(midi_out, piece);
-
-	// todo: start a thread for each voice
-	int i = 0;
-	for (auto v : piece)
-	{
-		cout << "Starting voice " << i++ << endl;
-		Play(midi_out, v);
-	}
-
-	cout << "Scheduler: done" << endl;
-    return 0;
-}
-
-void Scheduler::Play(MidiOut const& midi_out, Voice voice) const
-{
-	auto param_blocks = voice.GetParamBlocks();
-	int i = 0;
-	for (auto pb : param_blocks)
-	{
-		cout << "Starting param block " << i++ << endl;
-		Play(midi_out, voice.GetVoiceNumber(), pb);
-	}
-}
-
 void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
@@ -115,13 +84,13 @@ void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_bl
 		if (dur <= 0)
 		{
 			// Negative value for duration is a rest - no other gestures are consumed.
-			cout << dur << "<rest>" << endl;
+			//cout << dur << "<rest>" << endl;
 			sleep_for(milliseconds(absdur));
 		}
 		else
 		{
 			int pitch = pitch_gesture.Next(pitch_index);
-			cout << dur << "<" << pitch << ">" << endl;
+			//cout << dur << "<" << pitch << ">" << endl;
 			// todo: get velocity from gesture
 			int const velocity = 24;
 			midi_out.NoteOn(voice_num, pitch, velocity);
@@ -129,11 +98,54 @@ void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_bl
 			midi_out.NoteOff(voice_num, pitch);
 		}
 		total_dur += absdur;
-		cout << "Total dur = " << total_dur << endl;
+		//cout << "Total dur = " << total_dur << endl;
 	}
 
 	// Let things settle
 	sleep_for(milliseconds(1000));
+}
+
+void Scheduler::Play(MidiOut const& midi_out, Voice voice) const
+{
+	auto param_blocks = voice.GetParamBlocks();
+	//int i = 0;
+	for (auto pb : param_blocks)
+	{
+		//cout << "Starting param block " << i++ << endl;
+		Play(midi_out, voice.GetVoiceNumber(), pb);
+	}
+}
+
+int Scheduler::Play(MidiOut const& midi_out, Piece piece) const
+{
+	cout << "Scheduler: running" << endl;
+
+	AllocateVoices(piece);
+	InitializeVoices(midi_out, piece);
+
+	vector<thread> voice_threads{};
+
+	// Start a thread for each voice.
+	int i = 0;
+	for (auto v : piece)
+	{
+		cout << "Starting voice " << i++ << endl;
+
+		// Get address of overloaded const member function Play(midi_out, voice)
+		void (Scheduler:: *fpv)(MidiOut const&, Voice) const = &Scheduler::Play;
+
+		// First arg to thread constructor is pointer to member function, second arg is ref to valid object
+		// with this function, rest are args to the function.
+		voice_threads.push_back(thread(fpv, std::ref(*this), std::ref(midi_out), v));
+	}
+
+	for (auto & t : voice_threads)
+	{
+		t.join();
+	}
+
+	cout << "Scheduler: done" << endl;
+    return 0;
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
@@ -145,17 +157,15 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 	// todo: Possible improvement: if no more channels, go back and find a channel
 	// with the same instrument number and use that channel (multi-timbral synth).
 	
-	int const max_chan = 16;	    // todo: get from generalmidi.h
-	int const percussion_chan = 10;	// todo: get from generalmidi.h
 	int chan = 1;
 	int j = 0;
 	for (Voice & v : voices)
 	{
-		if (chan == percussion_chan)
+		if (chan == kPercussionChannel)
 		{
 			++chan;
 		}
-		if (chan > max_chan)
+		if (chan > kMaxChannelNumber)
 		{
 			cout << "Warning: out of channels for voice " << j << endl;
 		}

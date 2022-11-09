@@ -1,7 +1,7 @@
-# Added
+# More stuff
 .vs
-gem.vcxproj.filters
-gem.vcxproj.user
+*.vcxproj.filters
+*.vcxproj.user
 x64
 
 # Prerequisites

@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -26,7 +27,6 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
-#pragma once
 
 #include "MidiOut.h"
 
@@ -35,3 +35,4 @@ void test_channels(MidiOut const& mout);
 void test_program_change(MidiOut const& mout);
 void test_polyphony(MidiOut const& mout);
 void test_parameters(MidiOut const& mout);
+void test_performance(MidiOut& midi_out);

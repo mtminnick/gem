@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -27,44 +28,59 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
-#include <iostream>
-#include <cstdlib>
-#include "Gesture.h"
+inline unsigned char constexpr kNoteOn = 0x90;
+inline unsigned char constexpr kProgramChange = 0xc0;
 
-using std::cout;
-using std::endl;
-using std::abs;
+inline unsigned char constexpr kPercussionChannel = 10;
+inline unsigned char constexpr kMaxChannelNumber = 16;
 
-//
-// Gesture implementation.
-//
-
-int Gesture::AbsSum() const
+enum PatchMap : int
 {
-	int total = 0;
-	for (auto val : m_values)
-	{
-		total += abs(val);
-	}
-	return total;
-}
+	acoustic_grand_piano	= 1,
+	//...
+	choir_aahs				= 53,
+	//...
+};
 
-void Gesture::Dump() const
+enum NoteNumber: int
 {
-	for (auto val : m_values)
-	{
-		cout << val << " ";
-	}
-	cout << endl;
-}
-
-int Gesture::Next(int& idx) const
-{
-	// todo: use iterator
-	if (idx >= m_values.size())
-	{
-		idx = 0;
-	}
-
-	return m_values[idx++];
-}
+	cm1		= 0,
+	csm1	= 1,
+	dm1		= 2,
+	dsm1	= 3,
+	em1		= 4,
+	fm1		= 5,
+	fsm1	= 6,
+	gm1		= 7,
+	gsm1	= 8,
+	am1		= 9,
+	asm1	= 10,
+	bm1		= 11,
+	//...
+	c3		= 48,
+	cs3		= 49,
+	d3		= 50,
+	ds3		= 51,
+	e3		= 52,
+	f3		= 53,
+	fs3		= 54,
+	g3		= 55,
+	gs3		= 56,
+	a3		= 57,
+	as3		= 58,
+	b3		= 59,
+	//
+	c4		= 60,
+	cs4		= 61,
+	d4		= 62,
+	ds4		= 63,
+	e4		= 64,
+	f4		= 65,
+	fs4		= 66,
+	g4		= 67,
+	gs4		= 68,
+	a4		= 69,
+	as4		= 70,
+	b4		= 71,
+	//...
+};

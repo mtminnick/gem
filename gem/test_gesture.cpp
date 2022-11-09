@@ -26,6 +26,7 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
+
 #include <iostream>
 #include "Gesture.h"
 #include "Scheduler.h"

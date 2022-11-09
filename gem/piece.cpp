@@ -27,44 +27,42 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
-#include <iostream>
-#include <cstdlib>
+#include "piece.h"
 #include "Gesture.h"
+#include "Scheduler.h"
+#include "generalmidi.h"
 
-using std::cout;
-using std::endl;
-using std::abs;
-
-//
-// Gesture implementation.
-//
-
-int Gesture::AbsSum() const
+int piece1(MidiOut &midi_out)
 {
-	int total = 0;
-	for (auto val : m_values)
-	{
-		total += abs(val);
-	}
-	return total;
+	Gesture rhythm = make_gesture(1000, -500, 500);
+	Gesture pitch = make_gesture(c4, b4, a4);
+	int const pb_total_time = 10000;
+	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
+	Voice v = make_voice(acoustic_grand_piano, pb);
+	Piece p = make_piece(v);
+
+	Scheduler s;
+	int ret = s.Play(midi_out, p);
+	return ret;
 }
 
-void Gesture::Dump() const
+int piece2(MidiOut& midi_out)
 {
-	for (auto val : m_values)
-	{
-		cout << val << " ";
-	}
-	cout << endl;
-}
+	int const pb_total_time = 10000;
 
-int Gesture::Next(int& idx) const
-{
-	// todo: use iterator
-	if (idx >= m_values.size())
-	{
-		idx = 0;
-	}
+	Gesture rhythm = make_gesture(1000, -500, 500);
+	Gesture pitch = make_gesture(c4, b4, a4);
+	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
+	Voice v1 = make_voice(acoustic_grand_piano, pb);
 
-	return m_values[idx++];
+	Gesture rhythm2 = make_gesture(-500, 1000, 500);
+	Gesture pitch2 = make_gesture(d3, cs4, b3);
+	ParamBlock pb2 = make_param_block(pb_total_time, rhythm2, pitch2);
+	Voice v2 = make_voice(choir_aahs, pb2);
+
+	Piece p = make_piece(v1, v2);
+
+	Scheduler s;
+	int ret = s.Play(midi_out, p);
+	return ret;
 }
