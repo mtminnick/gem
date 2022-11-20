@@ -32,3 +32,4 @@
 
 int piece1(MidiOut& midi_out);
 int piece2(MidiOut& midi_out);
+int piece3(MidiOut& midi_out);

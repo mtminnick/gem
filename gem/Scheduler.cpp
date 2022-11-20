@@ -39,6 +39,7 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::abs;
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::thread;
 using std::vector;
@@ -167,7 +168,7 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		}
 		if (chan > kMaxChannelNumber)
 		{
-			cout << "Warning: out of channels for voice " << j << endl;
+			cerr << "Warning: out of channels for voice " << j << endl;
 		}
 		
 		cout << "Setting voice " << j << " to chan " << chan << endl;

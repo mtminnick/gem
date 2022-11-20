@@ -32,6 +32,7 @@
 #include "Gesture.h"
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::abs;
 
@@ -67,4 +68,53 @@ int Gesture::Next(int& idx) const
 	}
 
 	return m_values[idx++];
+}
+
+//
+// ParamBlock implementation.
+//
+
+inline int constexpr kRhythmIndex = 0;
+inline int constexpr kPitchIndex = 1;
+inline int constexpr kVelocityIndex = 2;
+
+Gesture ParamBlock::GetRhythmGesture() const
+{
+	if (m_gestures.size() > kRhythmIndex)
+	{
+		return m_gestures[kRhythmIndex];
+	}
+	else
+	{
+		cerr << "Error: missing rhythm gesture" << endl;
+		// todo: throw error
+		return make_gesture();
+	}
+}
+
+Gesture ParamBlock::GetPitchGesture() const
+{ 
+	if (m_gestures.size() > kPitchIndex)
+	{
+		return m_gestures[kPitchIndex];
+	}
+	else
+	{
+		cerr << "Error: missing pitch gesture" << endl;
+		// todo: throw error
+		return make_gesture();
+	}
+}
+
+Gesture ParamBlock::GetVelocityGesture() const
+{
+	if (m_gestures.size() > kVelocityIndex)
+	{
+		return m_gestures[kVelocityIndex];
+	}
+	else
+	{
+		cerr << "Warning: missing velocity gesture" << endl;
+		return make_gesture(24);
+	}
 }

@@ -60,10 +60,9 @@ public:
 	ParamBlock(int duration) : m_duration(duration) {}
 	ParamBlock() : m_duration(0) {};
 	void AddGesture(Gesture g) { m_gestures.push_back(g); }
-	// todo: validate index in getters
-	// todo: use enum class not magic numbers
-	Gesture GetRhythmGesture() const { return m_gestures[0]; }
-	Gesture GetPitchGesture() const { return m_gestures[1]; }
+	Gesture GetRhythmGesture() const;
+	Gesture GetPitchGesture() const;
+	Gesture GetVelocityGesture() const;
 	int GetDuration() const { return m_duration; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }

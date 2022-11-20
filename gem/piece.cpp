@@ -50,14 +50,38 @@ int piece2(MidiOut& midi_out)
 {
 	int const pb_total_time = 10000;
 
-	Gesture rhythm = make_gesture(1000, -500, 500);
+	Gesture rhythm = make_gesture(nQ, -n8, n8);
 	Gesture pitch = make_gesture(c4, b4, a4);
 	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
 	Voice v1 = make_voice(acoustic_grand_piano, pb);
 
-	Gesture rhythm2 = make_gesture(-500, 1000, 500);
+	Gesture rhythm2 = make_gesture(-n8, nQ, n8);
 	Gesture pitch2 = make_gesture(d3, cs4, b3);
 	ParamBlock pb2 = make_param_block(pb_total_time, rhythm2, pitch2);
+	Voice v2 = make_voice(choir_aahs, pb2);
+
+	Piece p = make_piece(v1, v2);
+
+	Scheduler s;
+	int ret = s.Play(midi_out, p);
+	return ret;
+}
+
+int piece3(MidiOut& midi_out)
+{
+	int const pb_total_time = 10000;
+
+	Gesture rhy_slow = make_gesture(nWd, nQd, nHd);
+	Gesture rhy_fast = make_gesture(-nH, n32, n32, n32, -n8, n16, n32, -n8d);
+	Gesture pitch_low = make_gesture(g2, a2, gs2, b2, as2);
+	Gesture pitch_high = make_gesture(c4, cs4, d4, ds4, fs4, f4, e4);
+	Gesture vel_soft = make_gesture(20); // for piano
+	Gesture vel_loud = make_gesture(60); // for voice
+
+	ParamBlock pb = make_param_block(pb_total_time, rhy_fast, pitch_high, vel_soft);
+	Voice v1 = make_voice(acoustic_grand_piano, pb);
+
+	ParamBlock pb2 = make_param_block(pb_total_time, rhy_slow, pitch_low, vel_loud);
 	Voice v2 = make_voice(choir_aahs, pb2);
 
 	Piece p = make_piece(v1, v2);

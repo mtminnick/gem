@@ -32,15 +32,18 @@
 #include "test_gesture.h"
 #include "piece.h"
 
+// omit sound like sandscrit S (linguistic 0) is like a musical zero
+// need a modulator for this
+
 int main()
 {
     int ret = 0;
 
     MidiOut midi_out{};
 
-    //test_polyphony(midi_out);
+    //test_velocity(midi_out);
 
-    ret = piece2(midi_out);
+    ret = piece3(midi_out);
 
     return ret;
 }

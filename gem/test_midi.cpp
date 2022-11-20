@@ -64,7 +64,7 @@ void test_note_on_off(MidiOut const& mout)
 
 void test_channels(MidiOut const& mout)
 {
-    cout << "Starting MIDI out test" << endl;
+    cout << "Starting MIDI out channels test" << endl;
 
     const int key = 0x3c;
     const int velocity = 0x24;
@@ -94,7 +94,7 @@ void test_channels(MidiOut const& mout)
 
 void test_program_change(MidiOut const& mout)
 {
-    cout << "Starting MIDI out test" << endl;
+    cout << "Starting MIDI out program test" << endl;
 
     const int channel = 1;
     const int key = 0x3c;
@@ -133,7 +133,7 @@ void test_program_change(MidiOut const& mout)
 
 void test_polyphony(MidiOut const& mout)
 {
-    cout << "Starting MIDI out test" << endl;
+    cout << "Starting MIDI out polyphony test" << endl;
 
     int const chan1 = 1;
     int const chan2 = 2;
@@ -214,7 +214,7 @@ void test_parameters(MidiOut const& mout)
 }
 
 // Should sound like a single voice.
-void test_performance(MidiOut& midi_out)
+void test_performance(MidiOut const& midi_out)
 {
 	int const pb_total_time = 10000;
 
@@ -230,3 +230,35 @@ void test_performance(MidiOut& midi_out)
 	Scheduler s;
     s.Play(midi_out, p);
 }
+
+void test_durations()
+{
+    cout << "W H Q 8th 16th 32nd" << endl;
+    cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << endl;
+    cout << "Dots" << endl;
+    cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << endl;
+    cout << "Triplets" << endl;
+    cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << endl;
+}
+
+void test_velocity(MidiOut const& mout)
+{
+    const int chan = 1;
+    const int prog = 1;
+    const int key = a4;
+    const int step = 10;
+    int velocity = step;
+    mout.ProgramChange(chan, prog);
+
+    while (velocity < 127)
+    {
+        mout.NoteOn(chan, key, velocity);
+        cout << velocity << " ";
+        sleep_for(milliseconds(1000));
+        mout.NoteOff(chan, key);
+        sleep_for(milliseconds(1000));
+        velocity += step;
+    }
+    cout << endl;
+}
+
