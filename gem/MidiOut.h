@@ -36,13 +36,16 @@ class MidiOut
 private:
 	UINT m_device_num = 0;
 	HMIDIOUT m_device_handle = NULL;
-	bool m_is_device_open = false;
+	// This Running Status is why functions must take MidiOut as non-const.
+	unsigned char m_last_status = 0;
 
-	void SendMIDIEvent(BYTE status, BYTE data1, BYTE data2) const;
+	void SendMIDIEvent(BYTE status, BYTE data1, BYTE data2);
 	unsigned char ClampChannel(int channel) const;
 	unsigned char ClampKey(int key) const;
 	unsigned char ClampVelocity(int velocity) const;
 	unsigned char ClampProgram(int program) const;
+	unsigned char ClampPan(int pan) const;
+	void ControlChange(unsigned char channel, unsigned char control, unsigned char value);
 
 public:
 	MidiOut();
@@ -50,7 +53,8 @@ public:
 	MidiOut(MidiOut const& p) = delete;
 	MidiOut& operator=(const MidiOut& p) = delete;
 
-	void NoteOn(int channel, int key, int velocity) const;
-	void NoteOff(int channel, int key) const;
-	void ProgramChange(int channel, int program) const;
+	void NoteOn(int channel, int key, int velocity);
+	void NoteOff(int channel, int key);
+	void ProgramChange(int channel, int program);
+	void PanControlChange(int channel, int pan);
 };

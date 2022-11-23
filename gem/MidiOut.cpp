@@ -34,6 +34,7 @@
 
 using std::cout;
 using std::endl;
+using std::cerr;
 using std::wcout;
 using std::wcerr;
 using std::hex;
@@ -42,8 +43,6 @@ using std::lock_guard;
 using std::mutex;
 
 // Requires:Winmm.lib
-
-// todo: consider using running status - no need to send status byte for sequences of all note-on/off.
 
 std::mutex g_midi_out_mutex;  // protects device access
 
@@ -54,9 +53,8 @@ MidiOut::MidiOut()
 
     if (num_devs < 1)
     {
-        cout << "No MIDI output devices found" << endl;
-        // todo: throw error
-        return;
+        cerr << "No MIDI output devices found" << endl;
+        throw std::runtime_error("");
     }
 
     // For now, use the first output device we find. Later, could ask user to choose.
@@ -69,8 +67,7 @@ MidiOut::MidiOut()
         wchar_t err_text[MAXERRORLENGTH];
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
         wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << endl;
-        // todo: throw error
-        return;
+        throw std::runtime_error("");
     }
 
     cout << "MIDI OUT Device " << dev_num << " MIDIOUTCAPS:" << endl;
@@ -92,46 +89,28 @@ MidiOut::MidiOut()
         wchar_t err_text[MAXERRORLENGTH];
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
         wcerr << "Error: midiOutOpen returns \"" << err_text << "\" (" << mmr << ")" << endl;
-        // todo: throw error
+        throw std::runtime_error("");
     }
     m_device_handle = dev_handle;
-    m_is_device_open = true;
     cout << "MIDI OUT Device opened" << endl;
 }
 
 MidiOut::~MidiOut()
 {
-    // todo: check not needed if constructor throws error
-    if (m_is_device_open)
+    MMRESULT mmr = midiOutClose(m_device_handle);
+    if (mmr != MMSYSERR_NOERROR)
     {
-        MMRESULT mmr = midiOutReset(m_device_handle);
-        if (mmr != MMSYSERR_NOERROR)
-        {
-            wchar_t err_text[MAXERRORLENGTH];
-            static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-            wcerr << "Error: midiOutReset returns \"" << err_text << "\" (" << mmr << ")" << endl;
-        }
-        else
-        {
-            cout << "MIDI OUT Device reset" << endl;
-        }
-
-        mmr = midiOutClose(m_device_handle);
-        if (mmr != MMSYSERR_NOERROR)
-        {
-            wchar_t err_text[MAXERRORLENGTH];
-            static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-            wcerr << "Error: midiOutClose returns \"" << err_text << "\" (" << mmr << ")" << endl;
-        }
-        else
-        {
-            m_is_device_open = false;
-            cout << "MIDI OUT Device closed" << endl;
-        }
+        wchar_t err_text[MAXERRORLENGTH];
+        static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
+        wcerr << "Error: midiOutClose returns \"" << err_text << "\" (" << mmr << ")" << endl;
+    }
+    else
+    {
+        cout << "MIDI OUT Device closed" << endl;
     }
 }
 
-void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2) const
+void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 {
     // todo: use variant
     union {
@@ -139,14 +118,38 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2) const
         BYTE bData[4];
     } u;
 
-    // Construct the MIDI message. 
-
-    u.bData[0] = bStatus;  // MIDI status byte 
-    u.bData[1] = bData1;   // first MIDI data byte 
-    u.bData[2] = bData2;   // second MIDI data byte 
-    u.bData[3] = 0;
-
     const lock_guard<mutex> lock(g_midi_out_mutex);
+
+    // Construct the MIDI message.
+
+    // Running Status does not seem to work with Microsoft GS Wavetable Synth.
+    // Works with CoolSoft VirtualMidiSynth.
+#define USE_RUNNING_STATUS
+#ifdef USE_RUNNING_STATUS
+    if (bStatus == m_last_status)
+    {
+        // Running Status.
+        u.bData[0] = bData1;    // first MIDI data byte 
+        u.bData[1] = bData2;    // second MIDI data byte 
+        u.bData[2] = 0;         // not used
+        u.bData[3] = 0;         // not used
+        //cout << "Running Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << endl;
+    }
+    else
+    {
+        u.bData[0] = bStatus;   // MIDI status byte 
+        u.bData[1] = bData1;    // first MIDI data byte 
+        u.bData[2] = bData2;    // second MIDI data byte 
+        u.bData[3] = 0;         // not used
+        m_last_status = bStatus;
+        //cout << "New Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << endl;
+    }
+#else
+    u.bData[0] = bStatus;   // MIDI status byte 
+    u.bData[1] = bData1;    // first MIDI data byte 
+    u.bData[2] = bData2;    // second MIDI data byte 
+    u.bData[3] = 0;         // not used
+#endif
 
     // Send the message.
     MMRESULT mmr = midiOutShortMsg(m_device_handle, u.dwData);
@@ -214,7 +217,21 @@ unsigned char MidiOut::ClampProgram(int program) const
     return static_cast<unsigned char>(program);
 }
 
-void MidiOut::NoteOn(int channel, int key, int velocity) const
+unsigned char MidiOut::ClampPan(int pan) const
+{
+    // Pan numbers are 0 - 127
+    if (pan < 0) {
+        wcerr << "Warning: invalid pan number " << pan << endl;
+        pan = 0;
+    }
+    if (pan > 127) {
+        wcerr << "Warning: invalid pan number " << pan << endl;
+        pan = 127;
+    }
+    return static_cast<unsigned char>(pan);
+}
+
+void MidiOut::NoteOn(int channel, int key, int velocity)
 {
     unsigned char status = kNoteOn + ClampChannel(channel) - 1;
     unsigned char data1 = ClampKey(key);
@@ -222,7 +239,7 @@ void MidiOut::NoteOn(int channel, int key, int velocity) const
     SendMIDIEvent(status, data1, data2);
 }
 
-void MidiOut::NoteOff(int channel, int key) const
+void MidiOut::NoteOff(int channel, int key)
 {
     // A note-on with velocity zero is treated as a note-off.
     // Helps with running status.
@@ -231,10 +248,24 @@ void MidiOut::NoteOff(int channel, int key) const
     SendMIDIEvent(status, data1, 0);
 }
 
-void MidiOut::ProgramChange(int channel, int program) const
+void MidiOut::ProgramChange(int channel, int program)
 {
     // Program numbers are 1 - 128 (data1 value 0 - 127)
     unsigned char status = kProgramChange + ClampChannel(channel) - 1;
     unsigned char data1 = ClampProgram(program) - 1;
     SendMIDIEvent(status, data1, 0);
+}
+
+void MidiOut::ControlChange(unsigned char channel, unsigned char control, unsigned char value)
+{
+    unsigned char status = kControlChange + channel; // 0-based channel
+    unsigned char data1 = control;
+    unsigned char data2 = value;    // pre-clamped value
+    SendMIDIEvent(status, data1, data2);
+}
+
+void MidiOut::PanControlChange(int channel, int pan)
+{
+    // todo: support full resolution using control change 0x2a (Pan LSB)
+    ControlChange(ClampChannel(channel) - 1, kControllerPanMSB, ClampPan(pan));
 }

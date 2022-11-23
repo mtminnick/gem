@@ -27,23 +27,32 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
+#include <iostream>
 #include "MidiOut.h"
 #include "test_midi.h"
 #include "test_gesture.h"
 #include "piece.h"
 
-// omit sound like sandscrit S (linguistic 0) is like a musical zero
-// need a modulator for this
+using std::cout;
+using std::endl;
+using std::cerr;
 
 int main()
 {
     int ret = 0;
 
-    MidiOut midi_out{};
+    try
+    {
+        MidiOut midi_out{};
 
-    //test_velocity(midi_out);
-
-    ret = piece3(midi_out);
+        //test_polyphony(midi_out);
+        ret = piece3(midi_out);
+    }
+    catch (const std::exception&)
+    {
+        cerr << "Caught exception!" << endl;
+        ret = 1;
+    }
 
     return ret;
 }

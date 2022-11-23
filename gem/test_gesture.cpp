@@ -61,7 +61,7 @@ void test_param_block()
 	pitch.Dump();
 }
 
-void test_voice_alloc(MidiOut const & midi_out)
+void test_voice_alloc(MidiOut& midi_out)
 {
 	Gesture r = make_gesture(100, -200, 300);
 	Gesture p = make_gesture(64, 65, 66);

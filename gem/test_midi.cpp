@@ -42,7 +42,7 @@ using std::this_thread::sleep_for;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 
-void test_note_on_off(MidiOut const& mout)
+void test_note_on_off(MidiOut& mout)
 {
     cout << "Starting MIDI out test" << endl;
 
@@ -62,7 +62,7 @@ void test_note_on_off(MidiOut const& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_channels(MidiOut const& mout)
+void test_channels(MidiOut& mout)
 {
     cout << "Starting MIDI out channels test" << endl;
 
@@ -92,7 +92,7 @@ void test_channels(MidiOut const& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_program_change(MidiOut const& mout)
+void test_program_change(MidiOut& mout)
 {
     cout << "Starting MIDI out program test" << endl;
 
@@ -122,7 +122,7 @@ void test_program_change(MidiOut const& mout)
         mout.NoteOn(channel, key, velocity);
 
         // Wait a bit
-        sleep_for(seconds(1));
+        sleep_for(seconds(2));
 
         // Send note-off
         mout.NoteOff(channel, key);
@@ -131,7 +131,7 @@ void test_program_change(MidiOut const& mout)
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_polyphony(MidiOut const& mout)
+void test_polyphony(MidiOut& mout)
 {
     cout << "Starting MIDI out polyphony test" << endl;
 
@@ -174,7 +174,6 @@ void test_polyphony(MidiOut const& mout)
 
     //
     // Test polyphony on a single channel
-    // (needed for a future voice allocation algo)
     //
 
     mout.ProgramChange(chan1, prog1);
@@ -197,11 +196,12 @@ void test_polyphony(MidiOut const& mout)
     // Turn off long note
     sleep_for(milliseconds(1000));
     mout.NoteOff(chan1, long_key);
+    sleep_for(milliseconds(1000));
 
     cout << "Ending of MIDI out test" << endl;
 }
 
-void test_parameters(MidiOut const& mout)
+void test_parameters(MidiOut& mout)
 {
     const int chan = 0;
     const int key = -1;
@@ -214,7 +214,7 @@ void test_parameters(MidiOut const& mout)
 }
 
 // Should sound like a single voice.
-void test_performance(MidiOut const& midi_out)
+void test_performance(MidiOut& mout)
 {
 	int const pb_total_time = 10000;
 
@@ -228,7 +228,7 @@ void test_performance(MidiOut const& midi_out)
 	Piece p = make_piece(v1, v2);
 
 	Scheduler s;
-    s.Play(midi_out, p);
+    s.Play(mout, p);
 }
 
 void test_durations()
@@ -241,7 +241,7 @@ void test_durations()
     cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << endl;
 }
 
-void test_velocity(MidiOut const& mout)
+void test_velocity(MidiOut& mout)
 {
     const int chan = 1;
     const int prog = 1;
@@ -262,3 +262,38 @@ void test_velocity(MidiOut const& mout)
     cout << endl;
 }
 
+// Pan support depends on instrument in soundfont; generally unreliable.
+void test_pan(MidiOut& mout)
+{
+    const int chan = 1;
+    const int prog = flute;
+    const int key = c5;
+    const int velocity = 24;
+
+    mout.ProgramChange(chan, prog);
+    
+    // Test pan change before note-on
+    int pan = 0;    // full left
+    mout.PanControlChange(chan, pan);
+    mout.NoteOn(chan, key, velocity);
+    sleep_for(milliseconds(2000));
+    mout.NoteOff(chan, key);
+    sleep_for(milliseconds(2000));
+
+    pan = 127;  // full right
+    mout.PanControlChange(chan, pan);
+    mout.NoteOn(chan, key, velocity);
+    sleep_for(milliseconds(2000));
+    mout.NoteOff(chan, key);
+    sleep_for(milliseconds(2000));
+
+    pan = 64;   // middle
+    mout.PanControlChange(chan, pan);
+    mout.NoteOn(chan, key, velocity);
+    sleep_for(milliseconds(2000));
+    mout.NoteOff(chan, key);
+    sleep_for(milliseconds(2000));
+
+    // Test pan change during note-on
+
+}

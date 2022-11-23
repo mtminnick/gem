@@ -44,40 +44,27 @@ using std::endl;
 using std::thread;
 using std::vector;
 
-// scheduler algo
-// start a thread for each voice
-// each thread: work through each param block
-// for each param block:
-// use rhythm gesture to work through pitch gesture, sending note-on (unless negative duration)
-// sleep for duration 
-// send note-off (if needed)
-
-// foreach voice in p (only do the first one until threads ready)
-// foreach paramblock in voice (only do the first one for now
-// for all values in rhy gesture (1st entry)
-// deal with pitch in pitch gesture (2nd entry)
-// Consider adding a modifer gesture for each param gesture, applied first (random, reverse, etc.)
-
-// Possible future voice allocatipn algo.
-// If voice has a fixed channel, use it (e.g. chan 10 for percussion).
-// Search for an unused channel. If found change the program and use the channel.
-// If not found, search for a channel with the same program and use it.
-// When not in use (rest), channel should be deallocated.
-// Only send program change if needed.
-
-void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_block) const
+void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
 	// Run through rhythm gesture one time.
 	// Other gestures may loop around or not get completely used.
 
+	// todo: apply order and value modulators to rhythm and value gestures
+	// todo: only send program change and other message if changed
+
 	Gesture rhythm_gesture = param_block.GetRhythmGesture();
 	Gesture pitch_gesture = param_block.GetPitchGesture();
+	Gesture velocity_gesture = param_block.GetVelocityGesture();
 
-	int rhythm_index = 0;	// updated by Next() through reference
-	int pitch_index = 0;	// updated by Next() through reference
+	// Indicies are updated by Next() through a reference.
+	int rhythm_index = 0;
+	int pitch_index = 0;
+	int velocity_index = 0;
+
 	int const max_dur = param_block.GetDuration();
 	int total_dur = 0;
+
 	while (total_dur < max_dur)
 	{
 		int dur = rhythm_gesture.Next(rhythm_index);
@@ -91,9 +78,9 @@ void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_bl
 		else
 		{
 			int pitch = pitch_gesture.Next(pitch_index);
-			//cout << dur << "<" << pitch << ">" << endl;
-			// todo: get velocity from gesture
-			int const velocity = 24;
+			int velocity = velocity_gesture.Next(velocity_index);
+			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << endl;
+
 			midi_out.NoteOn(voice_num, pitch, velocity);
 			sleep_for(milliseconds(dur));
 			midi_out.NoteOff(voice_num, pitch);
@@ -106,7 +93,7 @@ void Scheduler::Play(MidiOut const& midi_out, int voice_num, ParamBlock param_bl
 	sleep_for(milliseconds(1000));
 }
 
-void Scheduler::Play(MidiOut const& midi_out, Voice voice) const
+void Scheduler::Play(MidiOut& midi_out, Voice voice) const
 {
 	auto param_blocks = voice.GetParamBlocks();
 	//int i = 0;
@@ -117,7 +104,7 @@ void Scheduler::Play(MidiOut const& midi_out, Voice voice) const
 	}
 }
 
-int Scheduler::Play(MidiOut const& midi_out, Piece piece) const
+int Scheduler::Play(MidiOut& midi_out, Piece piece) const
 {
 	cout << "Scheduler: running" << endl;
 
@@ -133,7 +120,7 @@ int Scheduler::Play(MidiOut const& midi_out, Piece piece) const
 		cout << "Starting voice " << i++ << endl;
 
 		// Get address of overloaded const member function Play(midi_out, voice)
-		void (Scheduler:: *fpv)(MidiOut const&, Voice) const = &Scheduler::Play;
+		void (Scheduler:: *fpv)(MidiOut&, Voice) const = &Scheduler::Play;
 
 		// First arg to thread constructor is pointer to member function, second arg is ref to valid object
 		// with this function, rest are args to the function.
@@ -155,8 +142,11 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 	// For each voice, set channel number to the next available channel number.
 	// Skip channel 10 (percussion).
 	// Stop allocating when run out of channels.
+	// 
 	// todo: Possible improvement: if no more channels, go back and find a channel
 	// with the same instrument number and use that channel (multi-timbral synth).
+
+	// todo: let a voice explicity use percussion channel
 	
 	int chan = 1;
 	int j = 0;
@@ -175,16 +165,9 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		v.SetVoiceNumber(chan++);
 		++j;
 	}
-
-	// Possible future dynamic voice allocation algo.
-	// If voice has a fixed channel, use it (e.g. chan 10 for percussion).
-	// Search for an unused channel. If found change the program and use the channel.
-	// If not found, search for a channel with the same program and use it.
-	// When not in use (rest), channel should be deallocated.
-	// Only send program change if needed.
 }
 
-void Scheduler::InitializeVoices(MidiOut const& midi_out, std::vector<Voice> const & voices) const
+void Scheduler::InitializeVoices(MidiOut& midi_out, std::vector<Voice> const & voices) const
 {
 	// Send a midi program change to each channel.
 	for (auto v : voices)

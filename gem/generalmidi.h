@@ -30,6 +30,9 @@
 
 inline unsigned char constexpr kNoteOn = 0x90;
 inline unsigned char constexpr kProgramChange = 0xc0;
+inline unsigned char constexpr kControlChange = 0xb0;
+
+inline unsigned char constexpr kControllerPanMSB = 0x0a;
 
 inline unsigned char constexpr kPercussionChannel = 10;
 inline unsigned char constexpr kMaxChannelNumber = 16;
@@ -40,6 +43,7 @@ enum PatchMap : int
 	//...
 	choir_aahs				= 53,
 	//...
+	flute					= 74,
 };
 
 enum NoteNumber: int
@@ -95,6 +99,19 @@ enum NoteNumber: int
 	a4		= 69,
 	as4		= 70,
 	b4		= 71,
+	//
+	c5		= 72,
+	cs5		= 73,
+	d5		= 74,
+	ds5		= 75,
+	e5		= 76,
+	f5		= 77,
+	fs5		= 78,
+	g5		= 79,
+	gs5		= 80,
+	a5		= 81,
+	as5		= 82,
+	b5		= 83,
 	//...
 };
 

@@ -30,6 +30,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "Gesture.h"
+#include "generalmidi.h"
 
 using std::cout;
 using std::cerr;
@@ -87,8 +88,7 @@ Gesture ParamBlock::GetRhythmGesture() const
 	else
 	{
 		cerr << "Error: missing rhythm gesture" << endl;
-		// todo: throw error
-		return make_gesture();
+		throw std::runtime_error("");
 	}
 }
 
@@ -101,8 +101,7 @@ Gesture ParamBlock::GetPitchGesture() const
 	else
 	{
 		cerr << "Error: missing pitch gesture" << endl;
-		// todo: throw error
-		return make_gesture();
+		throw std::runtime_error("");
 	}
 }
 

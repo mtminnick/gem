@@ -37,10 +37,10 @@ class Scheduler
 {
 private:
 	void AllocateVoices(std::vector<Voice>& voices) const;
-	void InitializeVoices(MidiOut const& midi_out, std::vector<Voice> const & voices) const;
-	void Play(MidiOut const & midi_out, Voice voice) const;
-	void Play(MidiOut const & midi_out, int voice_numm, ParamBlock param_block) const;
+	void InitializeVoices(MidiOut& midi_out, std::vector<Voice> const & voices) const;
+	void Play(MidiOut& midi_out, Voice voice) const;
+	void Play(MidiOut& midi_out, int voice_numm, ParamBlock param_block) const;
 
 public:
-	int Play(MidiOut const & midi_out, Piece piece) const;
+	int Play(MidiOut& midi_out, Piece piece) const;
 };

@@ -30,11 +30,12 @@
 
 #include "MidiOut.h"
 
-void test_note_on_off(MidiOut const & mout);
-void test_channels(MidiOut const& mout);
-void test_program_change(MidiOut const& mout);
-void test_polyphony(MidiOut const& mout);
-void test_parameters(MidiOut const& mout);
-void test_performance(MidiOut const& midi_out);
+void test_note_on_off(MidiOut& mout);
+void test_channels(MidiOut& mout);
+void test_program_change(MidiOut& mout);
+void test_polyphony(MidiOut& mout);
+void test_parameters(MidiOut& mout);
+void test_performance(MidiOut& mout);
 void test_durations();
-void test_velocity(MidiOut const& midi_out);
+void test_velocity(MidiOut& mout);
+void test_pan(MidiOut& mout);

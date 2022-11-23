@@ -75,8 +75,8 @@ int piece3(MidiOut& midi_out)
 	Gesture rhy_fast = make_gesture(-nH, n32, n32, n32, -n8, n16, n32, -n8d);
 	Gesture pitch_low = make_gesture(g2, a2, gs2, b2, as2);
 	Gesture pitch_high = make_gesture(c4, cs4, d4, ds4, fs4, f4, e4);
-	Gesture vel_soft = make_gesture(20); // for piano
-	Gesture vel_loud = make_gesture(60); // for voice
+	Gesture vel_soft = make_gesture(40); // for piano
+	Gesture vel_loud = make_gesture(20); // for voice
 
 	ParamBlock pb = make_param_block(pb_total_time, rhy_fast, pitch_high, vel_soft);
 	Voice v1 = make_voice(acoustic_grand_piano, pb);
