@@ -1,7 +1,7 @@
 # gem
 Gesture Modulation with Win32 MIDI
 
-## CoolSoft VirtualMidiSynth
+## Using CoolSoft VirtualMidiSynth
 - https://https://coolsoft.altervista.org/en/virtualmidisynth
 - midiOutGetDevCaps():
 - Number of MIDI output devices = 2
@@ -16,7 +16,7 @@ Gesture Modulation with Win32 MIDI
 - wChannelMask (hex) = ffff
 - dwSupport = 1
 
-## Microsoft GS Wavetable Synth Info
+## Using Microsoft GS Wavetable Synth
 - Included in Windows 10
 - midiOutGetDevCaps():
 - Number of MIDI output devices = 1

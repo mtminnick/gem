@@ -63,6 +63,7 @@ public:
 	Gesture GetRhythmGesture() const;
 	Gesture GetPitchGesture() const;
 	Gesture GetVelocityGesture() const;
+	Gesture GetInstrumentGesture() const;
 	int GetDuration() const { return m_duration; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
@@ -73,16 +74,15 @@ class Voice
 private:
 	std::vector<ParamBlock> m_param_blocks;
 	int m_voice_number;
-	int m_instrument_number;
 
 public:
-	Voice(int inst_num, std::vector<ParamBlock> param_blocks) : m_voice_number(0), m_instrument_number(inst_num), m_param_blocks(param_blocks) {}
-	Voice(int inst_num) : m_voice_number(0), m_instrument_number(inst_num) {}
-	Voice() : m_voice_number(0), m_instrument_number(0) {}
+	static inline unsigned char constexpr kUnallocated = 0;
+
+	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number(kUnallocated), m_param_blocks(param_blocks) {}
+	Voice() : m_voice_number(kUnallocated) {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
-	void SetVoiceNumber(int num) { m_voice_number = num; }
+	void SetVoiceNumberOnce(int num);
 	int GetVoiceNumber() const { return m_voice_number; }
-	int GetInstrumentNumber() const { return m_instrument_number;  }
 	std::vector<ParamBlock> GetParamBlocks() const { return m_param_blocks; };
 	Voice& operator+=(ParamBlock pb) { AddParamBlock(pb); return *this; }
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }
@@ -108,9 +108,9 @@ ParamBlock make_param_block(int duration, Ts... params)
 }
 
 template<typename ... Ts>
-Voice make_voice(int instrument, Ts... params)
+Voice make_voice(Ts... params)
 {
-	return Voice{ instrument, std::vector<ParamBlock>{ params... } };
+	return Voice{ std::vector<ParamBlock>{ params... } };
 }
 
 template<typename ... Ts>

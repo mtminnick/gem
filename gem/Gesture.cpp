@@ -78,6 +78,7 @@ int Gesture::Next(int& idx) const
 inline int constexpr kRhythmIndex = 0;
 inline int constexpr kPitchIndex = 1;
 inline int constexpr kVelocityIndex = 2;
+inline int constexpr kInstrumentIndex = 3;
 
 Gesture ParamBlock::GetRhythmGesture() const
 {
@@ -115,5 +116,35 @@ Gesture ParamBlock::GetVelocityGesture() const
 	{
 		cerr << "Warning: missing velocity gesture" << endl;
 		return make_gesture(24);
+	}
+}
+
+Gesture ParamBlock::GetInstrumentGesture() const
+{
+	if (m_gestures.size() > kInstrumentIndex)
+	{
+		return m_gestures[kInstrumentIndex];
+	}
+	else
+	{
+		cerr << "Warning: missing instrument gesture" << endl;
+		return make_gesture(1);
+	}
+}
+
+//
+// Voice implementation.
+//
+
+// Allows app to set explicit voice number before Scheduler allocation.
+void Voice::SetVoiceNumberOnce(int num)
+{
+	if (m_voice_number == Voice::kUnallocated)
+	{
+		m_voice_number = num;
+	}
+	else
+	{
+		cout << "Voice number already set to " << m_voice_number << endl;
 	}
 }

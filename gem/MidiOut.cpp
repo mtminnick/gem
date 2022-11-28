@@ -217,18 +217,18 @@ unsigned char MidiOut::ClampProgram(int program) const
     return static_cast<unsigned char>(program);
 }
 
-unsigned char MidiOut::ClampPan(int pan) const
+unsigned char MidiOut::ClampController(int val) const
 {
-    // Pan numbers are 0 - 127
-    if (pan < 0) {
-        wcerr << "Warning: invalid pan number " << pan << endl;
-        pan = 0;
+    // Controller numbers are 0 - 127
+    if (val < 0) {
+        wcerr << "Warning: invalid controller value " << val << endl;
+        val = 0;
     }
-    if (pan > 127) {
-        wcerr << "Warning: invalid pan number " << pan << endl;
-        pan = 127;
+    if (val > 127) {
+        wcerr << "Warning: invalid controller value " << val << endl;
+        val = 127;
     }
-    return static_cast<unsigned char>(pan);
+    return static_cast<unsigned char>(val);
 }
 
 void MidiOut::NoteOn(int channel, int key, int velocity)
@@ -260,12 +260,18 @@ void MidiOut::ControlChange(unsigned char channel, unsigned char control, unsign
 {
     unsigned char status = kControlChange + channel; // 0-based channel
     unsigned char data1 = control;
-    unsigned char data2 = value;    // pre-clamped value
+    unsigned char data2 = value;    // clamped value
     SendMIDIEvent(status, data1, data2);
 }
 
 void MidiOut::PanControlChange(int channel, int pan)
 {
-    // todo: support full resolution using control change 0x2a (Pan LSB)
-    ControlChange(ClampChannel(channel) - 1, kControllerPanMSB, ClampPan(pan));
+    // todo: support full resolution using control change LSB
+    ControlChange(ClampChannel(channel) - 1, kControllerPanMSB, ClampController(pan));
+}
+
+void MidiOut::ModWheelControlChange(int channel, int mod)
+{
+    // todo: support full resolution using control change using LSB
+    ControlChange(ClampChannel(channel) - 1, kControllerModWheelMSB, ClampController(mod));
 }

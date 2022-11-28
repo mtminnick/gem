@@ -294,6 +294,40 @@ void test_pan(MidiOut& mout)
     mout.NoteOff(chan, key);
     sleep_for(milliseconds(2000));
 
-    // Test pan change during note-on
+    // todo: Test pan change during note-on
 
+}
+
+// Works on some instruments (e.g. violin) and not others (e.g. flute)
+void test_async_controller(MidiOut& mout)
+{
+    const int chan = 1;
+    const int prog = 41; // violin
+    const int key = c5;
+    const int velocity = 24;
+
+    mout.ProgramChange(chan, prog);
+
+    //// Turn note on
+    //mout.NoteOn(chan, key, velocity);
+    //sleep_for(milliseconds(4000));
+
+    //// Apply controller change
+    //const int mod = 127;
+    //cout << "Mod Wheel " << mod << endl;
+    //mout.ModWheelControlChange(chan, 127);
+    //sleep_for(milliseconds(4000));
+
+    //mout.NoteOff(chan, key);
+
+    // Apply controller change
+    const int mod = 127;
+    cout << "Mod Wheel " << mod << endl;
+    mout.ModWheelControlChange(chan, 127);
+
+    // Turn note on
+    mout.NoteOn(chan, key, velocity);
+    sleep_for(milliseconds(4000));
+
+    mout.NoteOff(chan, key);
 }

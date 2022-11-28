@@ -44,6 +44,7 @@ using std::endl;
 using std::thread;
 using std::vector;
 
+// Voice thread.
 void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
@@ -51,19 +52,23 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	// Other gestures may loop around or not get completely used.
 
 	// todo: apply order and value modulators to rhythm and value gestures
-	// todo: only send program change and other message if changed
+	// todo: start separate threads to play async controllers like pitch wheel and mod wheel. They
+	//       will get their own rhythm gestures.
 
 	Gesture rhythm_gesture = param_block.GetRhythmGesture();
 	Gesture pitch_gesture = param_block.GetPitchGesture();
 	Gesture velocity_gesture = param_block.GetVelocityGesture();
+	Gesture instrument_gesture = param_block.GetInstrumentGesture();
 
 	// Indicies are updated by Next() through a reference.
 	int rhythm_index = 0;
 	int pitch_index = 0;
 	int velocity_index = 0;
+	int instrument_index = 0;
 
 	int const max_dur = param_block.GetDuration();
 	int total_dur = 0;
+	int last_instrument = 0;
 
 	while (total_dur < max_dur)
 	{
@@ -77,6 +82,16 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 		}
 		else
 		{
+			// Apply the instrument change first, but only if it has changed.
+			int ins = instrument_gesture.Next(instrument_index);
+			if (ins != last_instrument)
+			{
+				midi_out.ProgramChange(voice_num, ins);
+				//cout << "new ins " << ins << endl;
+				last_instrument = ins;
+			}
+
+			// Genearate the note-on with velocity
 			int pitch = pitch_gesture.Next(pitch_index);
 			int velocity = velocity_gesture.Next(velocity_index);
 			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << endl;
@@ -109,7 +124,6 @@ int Scheduler::Play(MidiOut& midi_out, Piece piece) const
 	cout << "Scheduler: running" << endl;
 
 	AllocateVoices(piece);
-	InitializeVoices(midi_out, piece);
 
 	vector<thread> voice_threads{};
 
@@ -142,37 +156,25 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 	// For each voice, set channel number to the next available channel number.
 	// Skip channel 10 (percussion).
 	// Stop allocating when run out of channels.
-	// 
-	// todo: Possible improvement: if no more channels, go back and find a channel
-	// with the same instrument number and use that channel (multi-timbral synth).
 
-	// todo: let a voice explicity use percussion channel
-	
 	int chan = 1;
-	int j = 0;
+	int i = 0; // running count of allocated voices for logging
 	for (Voice & v : voices)
 	{
+		// Don't automatically assign the percussion channel.
 		if (chan == kPercussionChannel)
 		{
 			++chan;
 		}
 		if (chan > kMaxChannelNumber)
 		{
-			cerr << "Warning: out of channels for voice " << j << endl;
+			cerr << "Warning: out of channels for voice " << i << endl;
 		}
-		
-		cout << "Setting voice " << j << " to chan " << chan << endl;
-		v.SetVoiceNumber(chan++);
-		++j;
-	}
-}
-
-void Scheduler::InitializeVoices(MidiOut& midi_out, std::vector<Voice> const & voices) const
-{
-	// Send a midi program change to each channel.
-	for (auto v : voices)
-	{
-		cout << "Setting program " << v.GetInstrumentNumber() << " on chan " << v.GetVoiceNumber() << endl;
-		midi_out.ProgramChange(v.GetVoiceNumber(), v.GetInstrumentNumber());
+		else
+		{
+			cout << "Setting voice " << i << " to chan " << chan << endl;
+			v.SetVoiceNumberOnce(chan++);
+		}
+		++i;
 	}
 }

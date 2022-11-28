@@ -44,7 +44,7 @@ private:
 	unsigned char ClampKey(int key) const;
 	unsigned char ClampVelocity(int velocity) const;
 	unsigned char ClampProgram(int program) const;
-	unsigned char ClampPan(int pan) const;
+	unsigned char ClampController(int val) const;
 	void ControlChange(unsigned char channel, unsigned char control, unsigned char value);
 
 public:
@@ -57,4 +57,5 @@ public:
 	void NoteOff(int channel, int key);
 	void ProgramChange(int channel, int program);
 	void PanControlChange(int channel, int pan);
+	void ModWheelControlChange(int channel, int mod);
 };

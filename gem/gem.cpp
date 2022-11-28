@@ -45,7 +45,10 @@ int main()
     {
         MidiOut midi_out{};
 
-        //test_polyphony(midi_out);
+        // next: piece4 with percussion channel
+        // midi test with percussion channel (for pan position)
+
+        //test_async_controller(midi_out);
         ret = piece3(midi_out);
     }
     catch (const std::exception&)
