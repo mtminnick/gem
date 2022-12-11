@@ -45,6 +45,19 @@ enum PatchMap : int
 	choir_aahs				= 53,
 	//...
 	flute					= 74,
+	//...
+};
+
+enum PercussionMap : int
+{
+	acoustic_bass_drum = 35,
+	//...
+	acoustic_snare = 38,
+	//...
+	crash_cymbal_1 = 49,
+	high_tom = 50,
+	//...
+	open_triangle = 81
 };
 
 enum NoteNumber: int

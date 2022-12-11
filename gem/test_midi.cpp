@@ -331,3 +331,19 @@ void test_async_controller(MidiOut& mout)
 
     mout.NoteOff(chan, key);
 }
+
+void test_percussion(MidiOut& mout)
+{
+    const int chan = 10;
+    const int velocity = 65;
+
+    for (int key = acoustic_bass_drum; key <= open_triangle; key += 10)
+    {
+        mout.NoteOn(chan, key, velocity);
+        sleep_for(milliseconds(1000));
+        mout.NoteOff(chan, key);
+        sleep_for(milliseconds(500));
+    }
+
+    sleep_for(milliseconds(1000));
+}

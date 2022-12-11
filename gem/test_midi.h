@@ -40,3 +40,4 @@ void test_durations();
 void test_velocity(MidiOut& mout);
 void test_pan(MidiOut& mout);
 void test_async_controller(MidiOut& mout);
+void test_percussion(MidiOut& mout);

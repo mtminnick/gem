@@ -37,6 +37,8 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
+// todo: compile-time (constexpr funcs) to build data base of gestures and all modulations.
+
 int main()
 {
     int ret = 0;
@@ -45,11 +47,8 @@ int main()
     {
         MidiOut midi_out{};
 
-        // next: piece4 with percussion channel
-        // midi test with percussion channel (for pan position)
-
-        //test_async_controller(midi_out);
-        ret = piece3(midi_out);
+        //test_percussion(midi_out);
+        ret = piece4(midi_out);
     }
     catch (const std::exception&)
     {

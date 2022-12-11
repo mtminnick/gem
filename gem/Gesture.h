@@ -30,8 +30,6 @@
 
 #include <vector>
 
-// todo: cleanup unneeded member funcs and constructors.
-
 class Gesture
 {
 private:
@@ -64,7 +62,7 @@ public:
 	Gesture GetPitchGesture() const;
 	Gesture GetVelocityGesture() const;
 	Gesture GetInstrumentGesture() const;
-	int GetDuration() const { return m_duration; }
+	auto GetDuration() const { return m_duration; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
 };
@@ -82,8 +80,8 @@ public:
 	Voice() : m_voice_number(kUnallocated) {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
 	void SetVoiceNumberOnce(int num);
-	int GetVoiceNumber() const { return m_voice_number; }
-	std::vector<ParamBlock> GetParamBlocks() const { return m_param_blocks; };
+	auto GetVoiceNumber() const { return m_voice_number; }
+	auto GetParamBlocks() const { return m_param_blocks; };
 	Voice& operator+=(ParamBlock pb) { AddParamBlock(pb); return *this; }
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }
 };
@@ -96,25 +94,25 @@ typedef std::vector<Voice> Piece;
 //
 
 template<typename ... Ts>
-Gesture make_gesture(Ts... params)
+auto make_gesture(Ts... params)
 {
     return Gesture{ std::vector<int>{ params... } };
 }
 
 template<typename ... Ts>
-ParamBlock make_param_block(int duration, Ts... params)
+auto make_param_block(int duration, Ts... params)
 {
 	return ParamBlock{ duration, std::vector<Gesture>{ params... } };
 }
 
 template<typename ... Ts>
-Voice make_voice(Ts... params)
+auto make_voice(Ts... params)
 {
 	return Voice{ std::vector<ParamBlock>{ params... } };
 }
 
 template<typename ... Ts>
-Piece make_piece(Ts... params)
+auto make_piece(Ts... params)
 {
 	return std::vector<Voice>{ params... };
 }

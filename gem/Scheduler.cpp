@@ -55,10 +55,10 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	// todo: start separate threads to play async controllers like pitch wheel and mod wheel. They
 	//       will get their own rhythm gestures.
 
-	Gesture rhythm_gesture = param_block.GetRhythmGesture();
-	Gesture pitch_gesture = param_block.GetPitchGesture();
-	Gesture velocity_gesture = param_block.GetVelocityGesture();
-	Gesture instrument_gesture = param_block.GetInstrumentGesture();
+	auto rhythm_gesture = param_block.GetRhythmGesture();
+	auto pitch_gesture = param_block.GetPitchGesture();
+	auto velocity_gesture = param_block.GetVelocityGesture();
+	auto instrument_gesture = param_block.GetInstrumentGesture();
 
 	// Indicies are updated by Next() through a reference.
 	int rhythm_index = 0;
@@ -72,8 +72,8 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 
 	while (total_dur < max_dur)
 	{
-		int dur = rhythm_gesture.Next(rhythm_index);
-		int absdur = abs(dur);
+		auto dur = rhythm_gesture.Next(rhythm_index);
+		auto absdur = abs(dur);
 		if (dur <= 0)
 		{
 			// Negative value for duration is a rest - no other gestures are consumed.
@@ -83,17 +83,21 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 		else
 		{
 			// Apply the instrument change first, but only if it has changed.
-			int ins = instrument_gesture.Next(instrument_index);
-			if (ins != last_instrument)
+			// Don't send program change on percussion channel.
+			if (voice_num != kPercussionChannel)
 			{
-				midi_out.ProgramChange(voice_num, ins);
-				//cout << "new ins " << ins << endl;
-				last_instrument = ins;
+				auto ins = instrument_gesture.Next(instrument_index);
+				if (ins != last_instrument)
+				{
+					midi_out.ProgramChange(voice_num, ins);
+					cout << "new ins " << ins << endl;
+					last_instrument = ins;
+				}
 			}
 
 			// Genearate the note-on with velocity
-			int pitch = pitch_gesture.Next(pitch_index);
-			int velocity = velocity_gesture.Next(velocity_index);
+			auto pitch = pitch_gesture.Next(pitch_index);
+			auto velocity = velocity_gesture.Next(velocity_index);
 			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << endl;
 
 			midi_out.NoteOn(voice_num, pitch, velocity);

@@ -92,3 +92,24 @@ int piece3(MidiOut& midi_out)
 	int ret = s.Play(midi_out, p);
 	return ret;
 }
+
+int piece4(MidiOut& midi_out)
+{
+	int const pb_total_time = 10000;
+
+	Gesture rhy = make_gesture(nQd, -n8, n32, n32, -nQ, n16, -n8d, n16d, n16d, -nQ);
+	Gesture perc_instr = make_gesture(acoustic_bass_drum, high_tom, open_triangle, acoustic_snare, crash_cymbal_1);
+	Gesture vel = make_gesture(65, 65, 35);
+
+	ParamBlock pb = make_param_block(pb_total_time, rhy, perc_instr, vel);
+	Voice v1 = make_voice(pb);
+
+	// Force voice to percussion channel
+	v1.SetVoiceNumberOnce(kPercussionChannel);
+
+	Piece p = make_piece(v1);
+
+	Scheduler s;
+	int ret = s.Play(midi_out, p);
+	return ret;
+}
