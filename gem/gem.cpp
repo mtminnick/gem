@@ -28,6 +28,7 @@
  */
 
 #include <iostream>
+#include <cstdlib>
 #include "MidiOut.h"
 #include "test_midi.h"
 #include "test_gesture.h"
@@ -42,19 +43,25 @@ using std::cerr;
 int main()
 {
     int ret = 0;
+    std::srand(static_cast<unsigned int>(std::time(0)));
 
+    MidiOut::ShowInfo();
+
+    test_dictionary();
+
+#if 0
     try
     {
         MidiOut midi_out{};
 
-        //test_percussion(midi_out);
-        ret = piece4(midi_out);
+        ret = piece5(midi_out);
     }
     catch (const std::exception&)
     {
         cerr << "Caught exception!" << endl;
         ret = 1;
     }
+#endif
 
     return ret;
 }

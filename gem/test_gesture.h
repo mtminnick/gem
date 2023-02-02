@@ -33,3 +33,4 @@
 void test_gesture_wrap();
 void test_param_block();
 void test_voice_alloc(MidiOut& midi_out);
+void test_dictionary();

@@ -34,7 +34,6 @@
 class MidiOut
 {
 private:
-	UINT m_device_num = 0;
 	HMIDIOUT m_device_handle = NULL;
 	// This Running Status is why functions must take MidiOut as non-const.
 	unsigned char m_last_status = 0;
@@ -53,6 +52,7 @@ public:
 	MidiOut(MidiOut const& p) = delete;
 	MidiOut& operator=(const MidiOut& p) = delete;
 
+	static void ShowInfo();
 	void NoteOn(int channel, int key, int velocity);
 	void NoteOff(int channel, int key);
 	void ProgramChange(int channel, int program);

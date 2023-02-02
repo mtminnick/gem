@@ -49,7 +49,6 @@ std::mutex g_midi_out_mutex;  // protects device access
 MidiOut::MidiOut()
 {
     UINT num_devs = midiOutGetNumDevs();
-    cout << "Number of MIDI output devices = " << num_devs << endl;
 
     if (num_devs < 1)
     {
@@ -59,31 +58,8 @@ MidiOut::MidiOut()
 
     // For now, use the first output device we find. Later, could ask user to choose.
     UINT dev_num = 0;
-    MIDIOUTCAPS moc;
-    const UINT smoc = static_cast<UINT>(sizeof(moc));
-    MMRESULT mmr = midiOutGetDevCaps(dev_num, &moc, smoc);
-    if (mmr != MMSYSERR_NOERROR)
-    {
-        wchar_t err_text[MAXERRORLENGTH];
-        static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << endl;
-        throw std::runtime_error("");
-    }
-
-    cout << "MIDI OUT Device " << dev_num << " MIDIOUTCAPS:" << endl;
-    cout << "wMid = " << moc.wMid << endl;
-    cout << "wPid = " << moc.wPid << endl;
-    cout << "vDriverVersion = " << moc.vDriverVersion << endl;
-    wcout << "szPname = " << moc.szPname << endl;
-    cout << "wTechnology = " << moc.wTechnology << endl;
-    cout << "wVoices = " << moc.wVoices << endl;
-    cout << "wNotes = " << moc.wNotes << endl;
-    cout << "wChannelMask (hex) = " << hex << moc.wChannelMask << dec << endl;
-    cout << "dwSupport = " << moc.dwSupport << endl;
-    cout << endl;
-
     HMIDIOUT dev_handle;
-    mmr = midiOutOpen(&dev_handle, dev_num, NULL, 0, CALLBACK_NULL);
+    MMRESULT mmr = midiOutOpen(&dev_handle, dev_num, NULL, 0, CALLBACK_NULL);
     if (mmr != MMSYSERR_NOERROR)
     {
         wchar_t err_text[MAXERRORLENGTH];
@@ -110,6 +86,43 @@ MidiOut::~MidiOut()
     }
 }
 
+void MidiOut::ShowInfo()
+{
+    UINT num_devs = midiOutGetNumDevs();
+    cout << "Number of MIDI output devices = " << num_devs << endl;
+
+    if (num_devs < 1)
+    {
+        cerr << "No MIDI output devices found" << endl;
+        return;
+    }
+
+    // For now, use the first output device we find. Later, could ask user to choose.
+    UINT dev_num = 0;
+    MIDIOUTCAPS moc;
+    const UINT smoc = static_cast<UINT>(sizeof(moc));
+    MMRESULT mmr = midiOutGetDevCaps(dev_num, &moc, smoc);
+    if (mmr != MMSYSERR_NOERROR)
+    {
+        wchar_t err_text[MAXERRORLENGTH];
+        static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
+        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << endl;
+        return;
+    }
+
+    cout << "MIDI OUT Device " << dev_num << " MIDIOUTCAPS:" << endl;
+    cout << "wMid = " << moc.wMid << endl;
+    cout << "wPid = " << moc.wPid << endl;
+    cout << "vDriverVersion = " << moc.vDriverVersion << endl;
+    wcout << "szPname = " << moc.szPname << endl;
+    cout << "wTechnology = " << moc.wTechnology << endl;
+    cout << "wVoices = " << moc.wVoices << endl;
+    cout << "wNotes = " << moc.wNotes << endl;
+    cout << "wChannelMask (hex) = " << hex << moc.wChannelMask << dec << endl;
+    cout << "dwSupport = " << moc.dwSupport << endl;
+    cout << endl;
+}
+
 void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 {
     // todo: use variant
@@ -124,7 +137,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 
     // Running Status does not seem to work with Microsoft GS Wavetable Synth.
     // Works with CoolSoft VirtualMidiSynth.
-#define USE_RUNNING_STATUS
+//#define USE_RUNNING_STATUS
 #ifdef USE_RUNNING_STATUS
     if (bStatus == m_last_status)
     {

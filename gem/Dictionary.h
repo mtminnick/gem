@@ -1,3 +1,4 @@
+#pragma once
 /*
  * Copyright (c) 2022, Michael Minnick
  * All rights reserved.
@@ -27,62 +28,13 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
-#include <iostream>
+#include <vector>
+#include <map>
+#include <string>
 #include "Gesture.h"
-#include "Scheduler.h"
-#include "Dictionary.h"
-#include "test_gesture.h"
 
-using std::cout;
-using std::endl;
+typedef std::map<std::string, std::vector<Gesture>> Dictionary;
 
-void test_gesture_wrap()
-{
-	Gesture g = make_gesture(100, 200, 300);
+Dictionary build_dictionary();
 
-	cout << "test_gesture_wrap (100, 200, 300)" << endl;
-	int j = 0;
-	for (int i = 0; i < 10; i++)
-	{
-		cout << g.Next(j) << " ";
-	}
-	cout << endl;
-}
-
-void test_param_block()
-{
-	Gesture r = make_gesture(1000, -2000, 3000);
-	Gesture p = make_gesture(100, 200, 300);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
-
-	cout << "test_param_block (1000, -2000, 3000), (100, 200, 300)" << endl;
-	Gesture rhythm = pb.GetRhythmGesture();
-	Gesture pitch = pb.GetPitchGesture();
-	rhythm.Dump();
-	pitch.Dump();
-}
-
-void test_voice_alloc(MidiOut& midi_out)
-{
-	Gesture r = make_gesture(100, -200, 300);
-	Gesture p = make_gesture(64, 65, 66);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
-
-	int const too_many_voices = 17;
-	Piece piece;
-	for (int i = 0; i < too_many_voices; i++)
-	{
-		Voice v = make_voice(1, pb);
-		piece.push_back(v);
-	}
-
-	Scheduler s;
-	s.Play(midi_out, piece);
-}
-
-void test_dictionary()
-{
-	const auto dict = build_dictionary();
-	const Gesture ges = get_gesture(dict, "major-third");
-	ges.Dump();
-}
+Gesture get_gesture(Dictionary const& dict, std::string const& key);

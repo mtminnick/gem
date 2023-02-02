@@ -31,6 +31,7 @@
 #include "Gesture.h"
 #include "Scheduler.h"
 #include "generalmidi.h"
+#include "Dictionary.h"
 
 int piece1(MidiOut &midi_out)
 {

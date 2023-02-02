@@ -129,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Dictionary.cpp" />
     <ClCompile Include="gem.cpp" />
     <ClCompile Include="Gesture.cpp" />
     <ClCompile Include="MidiOut.cpp" />
@@ -138,6 +139,7 @@
     <ClCompile Include="test_midi.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Dictionary.h" />
     <ClInclude Include="generalmidi.h" />
     <ClInclude Include="Gesture.h" />
     <ClInclude Include="MidiOut.h" />

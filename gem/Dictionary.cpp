@@ -27,62 +27,59 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
+#include <cstdlib>
 #include <iostream>
-#include "Gesture.h"
-#include "Scheduler.h"
 #include "Dictionary.h"
-#include "test_gesture.h"
+#include "generalmidi.h"
 
-using std::cout;
+using std::vector;
+using std::cerr;
 using std::endl;
 
-void test_gesture_wrap()
+Dictionary build_dictionary()
 {
-	Gesture g = make_gesture(100, 200, 300);
+	Dictionary dict{};
 
-	cout << "test_gesture_wrap (100, 200, 300)" << endl;
-	int j = 0;
-	for (int i = 0; i < 10; i++)
+	// Pitch intervals.
+	dict["unison"] = vector<Gesture>{ make_gesture(c4) };
+	dict["minor_second"] = vector<Gesture>{ make_gesture(c4, cs4) };
+	dict["major-second"] = vector<Gesture>{ make_gesture(c4, d4) };
+	dict["minor-third"] = vector<Gesture>{ make_gesture(c4, ds4) };
+	dict["major-third"] = vector<Gesture>{ make_gesture(c4, e4) };
+	dict["forth"] = vector<Gesture>{ make_gesture(c4, f4) };
+	dict["tritone"] = vector<Gesture>{ make_gesture(c4, fs4) };
+	dict["fifth"] = vector<Gesture>{ make_gesture(c4, g4) };
+	dict["minor-sixth"] = vector<Gesture>{ make_gesture(c4, gs4) };
+	dict["sixth"] = vector<Gesture>{ make_gesture(c4, a4) };
+	dict["flat-seventh"] = vector<Gesture>{ make_gesture(c4, as4) };
+	dict["seventh"] = vector<Gesture>{ make_gesture(c4, b4) };
+
+	return dict;
+}
+
+// add get_dict(string, dict) returns random gesture inside "string" vector
+Gesture get_gesture(Dictionary const& dict, std::string const& key)
+{
+	// Pull out the gesture array that matches the key.
+	auto it = dict.find(key);
+	if (it == dict.end())
 	{
-		cout << g.Next(j) << " ";
+		cerr << "Warning: no gesture array for key '" << key << "'" << endl;
+		// Such an empty gesture.
+		return make_gesture();
 	}
-	cout << endl;
-}
+	vector<Gesture> vect = it->second;
 
-void test_param_block()
-{
-	Gesture r = make_gesture(1000, -2000, 3000);
-	Gesture p = make_gesture(100, 200, 300);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
-
-	cout << "test_param_block (1000, -2000, 3000), (100, 200, 300)" << endl;
-	Gesture rhythm = pb.GetRhythmGesture();
-	Gesture pitch = pb.GetPitchGesture();
-	rhythm.Dump();
-	pitch.Dump();
-}
-
-void test_voice_alloc(MidiOut& midi_out)
-{
-	Gesture r = make_gesture(100, -200, 300);
-	Gesture p = make_gesture(64, 65, 66);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
-
-	int const too_many_voices = 17;
-	Piece piece;
-	for (int i = 0; i < too_many_voices; i++)
+	// Return a random gesture from the gesture array.
+	size_t top = vect.size();
+	if (top == 0)
 	{
-		Voice v = make_voice(1, pb);
-		piece.push_back(v);
+		cerr << "Warning: empty gesture array for key '" << key << "'" << endl;
+		return make_gesture();
 	}
-
-	Scheduler s;
-	s.Play(midi_out, piece);
-}
-
-void test_dictionary()
-{
-	const auto dict = build_dictionary();
-	const Gesture ges = get_gesture(dict, "major-third");
-	ges.Dump();
+	else
+	{
+		int idx = rand() % top;
+		return vect.at(idx);
+	}
 }
