@@ -90,7 +90,7 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 				if (ins != last_instrument)
 				{
 					midi_out.ProgramChange(voice_num, ins);
-					cout << "new ins " << ins << endl;
+					//cout << "new ins " << ins << endl;
 					last_instrument = ins;
 				}
 			}

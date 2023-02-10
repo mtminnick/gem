@@ -137,7 +137,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 
     // Running Status does not seem to work with Microsoft GS Wavetable Synth.
     // Works with CoolSoft VirtualMidiSynth.
-//#define USE_RUNNING_STATUS
+#define USE_RUNNING_STATUS
 #ifdef USE_RUNNING_STATUS
     if (bStatus == m_last_status)
     {

@@ -1,8 +1,9 @@
 # gem
 Gesture Modulation with Win32 MIDI
 
-## Using CoolSoft VirtualMidiSynth
-- https://https://coolsoft.altervista.org/en/virtualmidisynth
+## Using CoolSoft VirtualMidiSynth with arachosoft soundfont
+- https://coolsoft.altervista.org/en/virtualmidisynth
+- http://www.arachnosoft.com/main/download.php?id=soundfont
 - midiOutGetDevCaps():
 - Number of MIDI output devices = 2
 - MIDI OUT Device 0 MIDIOUTCAPS:

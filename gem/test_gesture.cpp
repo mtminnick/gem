@@ -83,6 +83,9 @@ void test_voice_alloc(MidiOut& midi_out)
 void test_dictionary()
 {
 	const auto dict = build_dictionary();
-	const Gesture ges = get_gesture(dict, "major-third");
-	ges.Dump();
+	for (int i = 0; i < 10; i++)
+	{
+		Gesture ges = get_gesture(dict, "all-pitches");
+		ges.Dump();
+	}
 }

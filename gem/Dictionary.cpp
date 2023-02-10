@@ -40,19 +40,13 @@ Dictionary build_dictionary()
 {
 	Dictionary dict{};
 
-	// Pitch intervals.
-	dict["unison"] = vector<Gesture>{ make_gesture(c4) };
-	dict["minor_second"] = vector<Gesture>{ make_gesture(c4, cs4) };
-	dict["major-second"] = vector<Gesture>{ make_gesture(c4, d4) };
-	dict["minor-third"] = vector<Gesture>{ make_gesture(c4, ds4) };
-	dict["major-third"] = vector<Gesture>{ make_gesture(c4, e4) };
-	dict["forth"] = vector<Gesture>{ make_gesture(c4, f4) };
-	dict["tritone"] = vector<Gesture>{ make_gesture(c4, fs4) };
-	dict["fifth"] = vector<Gesture>{ make_gesture(c4, g4) };
-	dict["minor-sixth"] = vector<Gesture>{ make_gesture(c4, gs4) };
-	dict["sixth"] = vector<Gesture>{ make_gesture(c4, a4) };
-	dict["flat-seventh"] = vector<Gesture>{ make_gesture(c4, as4) };
-	dict["seventh"] = vector<Gesture>{ make_gesture(c4, b4) };
+	dict["all-pitches"] = vector<Gesture>{ make_gesture(c4, e4, fs4),
+										   make_gesture(b4, g4, as4, d4),
+		                                   make_gesture(cs4, ds4, g4, ds4),
+			                               make_gesture(a4, f4) };
+	dict["slow-drama"] = vector<Gesture>{  make_gesture(nW, -nQd, nQd, nH, -nH),
+										   make_gesture(-nH, nW, -nQd, nQd, nH),
+										   make_gesture(nH, -nH, nW, -nQd, nQd) };
 
 	return dict;
 }

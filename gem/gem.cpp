@@ -38,8 +38,6 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
-// todo: compile-time (constexpr funcs) to build data base of gestures and all modulations.
-
 int main()
 {
     int ret = 0;
@@ -47,13 +45,14 @@ int main()
 
     MidiOut::ShowInfo();
 
-    test_dictionary();
+    //test_dictionary();
 
-#if 0
+#if 1
     try
     {
         MidiOut midi_out{};
 
+        //ret = piece4(midi_out);
         ret = piece5(midi_out);
     }
     catch (const std::exception&)

@@ -3,6 +3,7 @@
 *.vcxproj.filters
 *.vcxproj.user
 x64
+*.bak
 
 # Prerequisites
 *.d

@@ -96,19 +96,65 @@ int piece3(MidiOut& midi_out)
 
 int piece4(MidiOut& midi_out)
 {
-	int const pb_total_time = 10000;
+	int const pb_total_time = 15000;
 
-	Gesture rhy = make_gesture(nQd, -n8, n32, n32, -nQ, n16, -n8d, n16d, n16d, -nQ);
-	Gesture perc_instr = make_gesture(acoustic_bass_drum, high_tom, open_triangle, acoustic_snare, crash_cymbal_1);
-	Gesture vel = make_gesture(65, 65, 35);
+	Gesture rhy1 = make_gesture(nQd, -n8, n32, n32, -nQ, n16, -n8d, n16d, n16d, -nQ);
+	Gesture perc_instr1 = make_gesture(acoustic_bass_drum, high_tom, open_triangle, acoustic_snare, crash_cymbal_1);
+	Gesture vel1 = make_gesture(85, 75, 60);
 
-	ParamBlock pb = make_param_block(pb_total_time, rhy, perc_instr, vel);
-	Voice v1 = make_voice(pb);
+	ParamBlock pb1 = make_param_block(pb_total_time, rhy1, perc_instr1, vel1);
+	Voice v1 = make_voice(pb1);
 
-	// Force voice to percussion channel
+	const int roll = n32 / 2;
+	Gesture rhy2 = make_gesture(-nW, roll, roll, roll, roll, roll, -nWd, roll, roll, roll);
+	Gesture perc_instr2 = make_gesture(acoustic_snare);
+	Gesture vel2 = make_gesture(65, 55, 55, 55);
+
+	ParamBlock pb2 = make_param_block(pb_total_time, rhy2, perc_instr2, vel2);
+	Voice v2 = make_voice(pb2);
+
+	// Force voices to percussion channel
 	v1.SetVoiceNumberOnce(kPercussionChannel);
+	v2.SetVoiceNumberOnce(kPercussionChannel);
 
-	Piece p = make_piece(v1);
+	Piece p = make_piece(v1, v2);
+
+	Scheduler s;
+	int ret = s.Play(midi_out, p);
+	return ret;
+}
+
+int piece5(MidiOut& midi_out)
+{
+	int const pb_total_time = 20000;
+	const auto dict = build_dictionary();
+
+	Gesture vel = make_gesture(60);
+	Gesture ins = make_gesture(church_organ);
+
+	// Each call to dict pulls a random gesture.
+	Gesture pitch1 = get_gesture(dict, "all-pitches");
+	Gesture pitch2 = get_gesture(dict, "all-pitches");
+	Gesture pitch3 = get_gesture(dict, "all-pitches");
+	//Gesture pitch4 = get_gesture(dict, "all-pitches");
+
+	Gesture rhy1 = get_gesture(dict, "slow-drama");
+	Gesture rhy2 = get_gesture(dict, "slow-drama");
+	Gesture rhy3 = get_gesture(dict, "slow-drama");
+	//Gesture rhy4 = get_gesture(dict, "slow-drama");
+
+	ParamBlock pb1 = make_param_block(pb_total_time, rhy1, pitch1, vel, ins);
+	ParamBlock pb2 = make_param_block(pb_total_time, rhy2, pitch2, vel, ins);
+	ParamBlock pb3 = make_param_block(pb_total_time, rhy3, pitch3, vel, ins);
+	//ParamBlock pb4 = make_param_block(pb_total_time, rhy4, pitch4, vel, ins);
+
+	Voice v1 = make_voice(pb1);
+	Voice v2 = make_voice(pb2);
+	Voice v3 = make_voice(pb3);
+	//Voice v4 = make_voice(pb4);
+
+	//Piece p = make_piece(v1, v2, v3, v4);
+	Piece p = make_piece(v1, v2, v3);
 
 	Scheduler s;
 	int ret = s.Play(midi_out, p);
