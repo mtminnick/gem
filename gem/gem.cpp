@@ -38,6 +38,36 @@ using std::cout;
 using std::endl;
 using std::cerr;
 
+void tests(MidiOut &midi_out)
+{
+    // Note: tests are interactive on the command line.
+
+    test_note_on_off(midi_out);
+    test_channels(midi_out);
+    test_program_change(midi_out);
+    test_polyphony(midi_out);
+    test_parameters(midi_out);  // todo: investigate - makes a cool noise
+    test_performance(midi_out);
+    test_durations();
+    test_velocity(midi_out);
+    test_pan(midi_out);
+    test_async_controller(midi_out);
+    test_percussion(midi_out);
+
+    test_gesture_wrap();
+    test_param_block();
+    test_voice_alloc(midi_out);
+    test_dictionary();
+}
+
+void pieces(MidiOut &midi_out)
+{
+    piece1(midi_out);
+    piece2(midi_out);
+    piece3(midi_out);
+    piece4(midi_out);
+    piece5(midi_out);
+}
 int main()
 {
     int ret = 0;
@@ -45,22 +75,18 @@ int main()
 
     MidiOut::ShowInfo();
 
-    //test_dictionary();
-
-#if 1
     try
     {
         MidiOut midi_out{};
 
-        //ret = piece4(midi_out);
-        ret = piece5(midi_out);
+        tests(midi_out);
+        //pieces(midi_out);
     }
     catch (const std::exception&)
     {
         cerr << "Caught exception!" << endl;
         ret = 1;
     }
-#endif
 
     return ret;
 }

@@ -123,7 +123,7 @@ void Scheduler::Play(MidiOut& midi_out, Voice voice) const
 	}
 }
 
-int Scheduler::Play(MidiOut& midi_out, Piece piece) const
+void Scheduler::Play(MidiOut& midi_out, Piece piece) const
 {
 	cout << "Scheduler: running" << endl;
 
@@ -151,7 +151,6 @@ int Scheduler::Play(MidiOut& midi_out, Piece piece) const
 	}
 
 	cout << "Scheduler: done" << endl;
-    return 0;
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const

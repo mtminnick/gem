@@ -41,5 +41,5 @@ private:
 	void Play(MidiOut& midi_out, int voice_numm, ParamBlock param_block) const;
 
 public:
-	int Play(MidiOut& midi_out, Piece piece) const;
+	void Play(MidiOut& midi_out, Piece piece) const;
 };

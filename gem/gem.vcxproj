@@ -145,6 +145,7 @@
     <ClInclude Include="MidiOut.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="Scheduler.h" />
+    <ClInclude Include="Test.h" />
     <ClInclude Include="test_gesture.h" />
     <ClInclude Include="test_midi.h" />
   </ItemGroup>

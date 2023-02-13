@@ -30,10 +30,12 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <string>
 #include "test_midi.h"
 #include "Gesture.h"
 #include "Scheduler.h"
 #include "generalmidi.h"
+#include "Test.h"
 
 using std::cout;
 using std::endl;
@@ -41,10 +43,11 @@ using std::cin;
 using std::this_thread::sleep_for;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
+using std::string;
 
 void test_note_on_off(MidiOut& mout)
 {
-    cout << "Starting MIDI out test" << endl;
+    Test::Enter(__func__, "Should hear a single note.");
 
     const int channel = 0x1;
     const int key = 0x3c;
@@ -59,12 +62,12 @@ void test_note_on_off(MidiOut& mout)
     // Send note-off
     mout.NoteOff(channel, key);
 
-    cout << "Ending of MIDI out test" << endl;
+    Test::Exit();
 }
 
 void test_channels(MidiOut& mout)
 {
-    cout << "Starting MIDI out channels test" << endl;
+    Test::Enter(__func__, "Should hear the same note on each channel (channel 10 is Percussion).");
 
     const int key = 0x3c;
     const int velocity = 0x24;
@@ -89,12 +92,12 @@ void test_channels(MidiOut& mout)
         //cin.get();
     }
 
-    cout << "Ending of MIDI out test" << endl;
+    Test::Exit();
 }
 
 void test_program_change(MidiOut& mout)
 {
-    cout << "Starting MIDI out program test" << endl;
+    Test::Enter(__func__, "Should hear a single note using the selected program (instrument).");
 
     const int channel = 1;
     const int key = 0x3c;
@@ -107,7 +110,7 @@ void test_program_change(MidiOut& mout)
     int program = 0;
     while (true)
     {
-        cout << "Enter program, 0 to quit: ";
+        cout << "Enter program 1 through 128, 0 to quit: ";
         cin >> program;
         if (program < 1 || program > 128)
         {
@@ -128,18 +131,18 @@ void test_program_change(MidiOut& mout)
         mout.NoteOff(channel, key);
     }
 
-    cout << "Ending of MIDI out test" << endl;
+    Test::Exit();
 }
 
 void test_polyphony(MidiOut& mout)
 {
-    cout << "Starting MIDI out polyphony test" << endl;
+    Test::Enter(__func__, "Should hear a long sustained note with 3 short notes on top; second time with same instrument on top.");
 
     int const chan1 = 1;
     int const chan2 = 2;
     int const prog1 = 53; // Choir Aahs
     int const prog2 = 1;  // Acoustic Grand Piano
-    int const velocity = 0x24;
+    int const velocity = 0x45;
     int const long_key = 60;
     int const short_key1 = 58;
     int const short_key2 = 66;
@@ -198,11 +201,13 @@ void test_polyphony(MidiOut& mout)
     mout.NoteOff(chan1, long_key);
     sleep_for(milliseconds(1000));
 
-    cout << "Ending of MIDI out test" << endl;
+    Test::Exit();
 }
 
 void test_parameters(MidiOut& mout)
 {
+    Test::Enter(__func__, "Should see parameter range warnings.");
+
     const int chan = 0;
     const int key = -1;
     const int velocity = 129;
@@ -211,38 +216,48 @@ void test_parameters(MidiOut& mout)
     mout.NoteOn(chan, key, velocity);
     sleep_for(milliseconds(1000));
     mout.NoteOff(chan, key);
+
+    Test::Exit();
 }
 
-// Should sound like a single voice.
 void test_performance(MidiOut& mout)
 {
-	int const pb_total_time = 10000;
+    Test::Enter(__func__, "Two voices starting at the same time should sound like a single voice.");
+    
+    int const pb_total_time = 10000;
 
 	Gesture rhythm = make_gesture(1000, -500, 500);
 	Gesture pitch = make_gesture(c4, b4, a4);
 	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
-	Voice v1 = make_voice(acoustic_grand_piano, pb);
-
-	Voice v2 = make_voice(acoustic_grand_piano, pb);
+	Voice v1 = make_voice(pb);
+	Voice v2 = make_voice(pb);
 
 	Piece p = make_piece(v1, v2);
 
 	Scheduler s;
     s.Play(mout, p);
+
+    Test::Exit();
 }
 
 void test_durations()
 {
+    Test::Enter(__func__, "Displays durations in milliseconds.");
+
     cout << "W H Q 8th 16th 32nd" << endl;
     cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << endl;
     cout << "Dots" << endl;
     cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << endl;
     cout << "Triplets" << endl;
     cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << endl;
+
+    Test::Exit();
 }
 
 void test_velocity(MidiOut& mout)
 {
+    Test::Enter(__func__, "Should hear velocity increasing in steps.");
+
     const int chan = 1;
     const int prog = 1;
     const int key = a4;
@@ -260,11 +275,15 @@ void test_velocity(MidiOut& mout)
         velocity += step;
     }
     cout << endl;
+
+    Test::Exit();
 }
 
 // Pan support depends on instrument in soundfont; generally unreliable.
 void test_pan(MidiOut& mout)
 {
+    Test::Enter(__func__, "Should hear at least minimal panning.");
+
     const int chan = 1;
     const int prog = flute;
     const int key = c5;
@@ -296,54 +315,67 @@ void test_pan(MidiOut& mout)
 
     // todo: Test pan change during note-on
 
+    Test::Exit();
 }
 
 // Works on some instruments (e.g. violin) and not others (e.g. flute)
 void test_async_controller(MidiOut& mout)
 {
+    Test::Enter(__func__, "Should hear violin vibrato during a note on and then applied before a note on.");
+
     const int chan = 1;
     const int prog = 41; // violin
     const int key = c5;
     const int velocity = 24;
+    const int mod = 127;
 
     mout.ProgramChange(chan, prog);
 
-    //// Turn note on
-    //mout.NoteOn(chan, key, velocity);
-    //sleep_for(milliseconds(4000));
-
-    //// Apply controller change
-    //const int mod = 127;
-    //cout << "Mod Wheel " << mod << endl;
-    //mout.ModWheelControlChange(chan, 127);
-    //sleep_for(milliseconds(4000));
-
-    //mout.NoteOff(chan, key);
+    // Apply controller change during note on.
+    mout.NoteOn(chan, key, velocity);
+    sleep_for(milliseconds(4000));
 
     // Apply controller change
-    const int mod = 127;
     cout << "Mod Wheel " << mod << endl;
-    mout.ModWheelControlChange(chan, 127);
+    mout.ModWheelControlChange(chan, mod);
+    sleep_for(milliseconds(4000));
+
+    mout.NoteOff(chan, key);
+
+    sleep_for(milliseconds(1000));
+
+    // Apply controller change before note on.
+    cout << "Mod Wheel " << mod << endl;
+    mout.ModWheelControlChange(chan, mod);
 
     // Turn note on
     mout.NoteOn(chan, key, velocity);
     sleep_for(milliseconds(4000));
-
     mout.NoteOff(chan, key);
+
+    Test::Exit();
 }
 
 void test_percussion(MidiOut& mout)
 {
+    Test::Enter(__func__, "Should hear a note for every instrument on the percussion channel.");
+
     const int chan = 10;
     const int velocity = 65;
 
-    for (int key = acoustic_bass_drum; key <= open_triangle; key += 10)
+    cout << "keys";
+
+    for (int key = acoustic_bass_drum; key <= open_triangle; key++)
     {
+        cout << " " << key;
         mout.NoteOn(chan, key, velocity);
         sleep_for(milliseconds(1000));
         mout.NoteOff(chan, key);
         sleep_for(milliseconds(500));
     }
 
+    cout << endl;
     sleep_for(milliseconds(1000));
+
+    Test::Exit();
 }

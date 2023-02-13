@@ -30,8 +30,8 @@
 
 #include "MidiOut.h"
 
-int piece1(MidiOut& midi_out);
-int piece2(MidiOut& midi_out);
-int piece3(MidiOut& midi_out);
-int piece4(MidiOut& midi_out);
-int piece5(MidiOut& midi_out);
+void piece1(MidiOut& midi_out);
+void piece2(MidiOut& midi_out);
+void piece3(MidiOut& midi_out);
+void piece4(MidiOut& midi_out);
+void piece5(MidiOut& midi_out);

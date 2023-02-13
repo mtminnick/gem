@@ -27,13 +27,17 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
+#include <iostream>
 #include "piece.h"
 #include "Gesture.h"
 #include "Scheduler.h"
 #include "generalmidi.h"
 #include "Dictionary.h"
 
-int piece1(MidiOut &midi_out)
+using std::cout;
+using std::endl;
+
+void piece1(MidiOut &midi_out)
 {
 	Gesture rhythm = make_gesture(1000, -500, 500);
 	Gesture pitch = make_gesture(c4, b4, a4);
@@ -42,12 +46,13 @@ int piece1(MidiOut &midi_out)
 	Voice v = make_voice(pb);
 	Piece p = make_piece(v);
 
+	cout << "** Piece 1 **" << endl;
+
 	Scheduler s;
-	int ret = s.Play(midi_out, p);
-	return ret;
+	s.Play(midi_out, p);
 }
 
-int piece2(MidiOut& midi_out)
+void piece2(MidiOut& midi_out)
 {
 	int const pb_total_time = 10000;
 
@@ -63,12 +68,13 @@ int piece2(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
+	cout << "** Piece 2 **" << endl;
+
 	Scheduler s;
-	int ret = s.Play(midi_out, p);
-	return ret;
+	s.Play(midi_out, p);
 }
 
-int piece3(MidiOut& midi_out)
+void piece3(MidiOut& midi_out)
 {
 	int const pb_total_time = 10000;
 
@@ -89,12 +95,13 @@ int piece3(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
+	cout << "** Piece 3 **" << endl;
+
 	Scheduler s;
-	int ret = s.Play(midi_out, p);
-	return ret;
+	s.Play(midi_out, p);
 }
 
-int piece4(MidiOut& midi_out)
+void piece4(MidiOut& midi_out)
 {
 	int const pb_total_time = 15000;
 
@@ -119,12 +126,13 @@ int piece4(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
+	cout << "** Piece 4 **" << endl;
+
 	Scheduler s;
-	int ret = s.Play(midi_out, p);
-	return ret;
+	s.Play(midi_out, p);
 }
 
-int piece5(MidiOut& midi_out)
+void piece5(MidiOut& midi_out)
 {
 	int const pb_total_time = 20000;
 	const auto dict = build_dictionary();
@@ -156,7 +164,8 @@ int piece5(MidiOut& midi_out)
 	//Piece p = make_piece(v1, v2, v3, v4);
 	Piece p = make_piece(v1, v2, v3);
 
+	cout << "** Piece 5 **" << endl;
+
 	Scheduler s;
-	int ret = s.Play(midi_out, p);
-	return ret;
+	s.Play(midi_out, p);
 }
