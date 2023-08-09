@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Comment CommentText="MidiOut drives the hardware">
+    <Position X="0.5" Y="0.5" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Scheduler drives the playback of a Piece">
+    <Position X="0.5" Y="1.5" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="A Piece is a vector of voices (overlapping instrument parts)">
+    <Position X="0.5" Y="2.59" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="A Voice is a vector of ParamBlocks, one for each parameter (rhythm, pitch, etc)">
+    <Position X="0.5" Y="3.583" Height="0.854" Width="1.7" />
+  </Comment>
+  <Comment CommentText="A ParamBlock is a vector of Gestures (values in a sequence) for a particular parameter">
+    <Position X="0.5" Y="4.569" Height="0.951" Width="1.7" />
+  </Comment>
+  <Comment CommentText="A Gesture is a vector of Integers, which map directly to MIDI values">
+    <Position X="0.5" Y="5.59" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="These enums can be used in Gestures">
+    <Position X="0.5" Y="6.639" Height="0.75" Width="1.7" />
+  </Comment>
+  <Comment CommentText="Piece	[voice #1]		Pblock [pitch]	Gesture (c3, e3, d2)&#xD;&#xA;			Pblock [rhythm]	Gesture (Q, H)&#xD;&#xA;&#xD;&#xA;	[voice #2]		Pblock [pitch]	Gesture (c3, e3, d2)&#xD;&#xA;			Pblock [rhythm]	Gesture (Q, H)&#xD;&#xA;">
+    <Position X="5.243" Y="2.757" Height="1.264" Width="4.054" />
+  </Comment>
+  <Class Name="Gesture" Collapsed="true">
+    <Position X="2.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgACAAAAAAAAAAAAAQAAgSAAAAAAAAAAAAAgEAAAAAA=</HashCode>
+      <FileName>Gesture.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ParamBlock" Collapsed="true">
+    <Position X="2.5" Y="4.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAwAAAAAAAAAAAgAQCAAAAAAABCAAAgAAJABAA=</HashCode>
+      <FileName>Gesture.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Voice" Collapsed="true">
+    <Position X="2.5" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAABAEAAAAAARAAABAAAAAAAAAgBAAAAAg=</HashCode>
+      <FileName>Gesture.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MidiOut" Collapsed="true">
+    <Position X="2.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAABCAAhABAAAUEBAAEIAAAAgAgIAAAADI=</HashCode>
+      <FileName>MidiOut.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Scheduler" Collapsed="true">
+    <Position X="2.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Scheduler.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Test" Collapsed="true">
+    <Position X="6" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAIAAACAAAAAA=</HashCode>
+      <FileName>Test.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Typedef Name="Dictionary" Collapsed="true">
+    <Position X="6" Y="1.5" Width="4" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Dictionary.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="Piece" Collapsed="true">
+    <Position X="2.5" Y="2.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Gesture.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="PatchMap" Collapsed="true">
+    <Position X="4.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAACAIAAAAAAAAIAAAAAAAAAAAEAA=</HashCode>
+      <FileName>generalmidi.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="PercussionMap" Collapsed="true">
+    <Position X="6.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAAAAAAAAAAAQRQAAAAAAAAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>generalmidi.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="NoteNumber" Collapsed="true">
+    <Position X="2.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>sA8AIAAAAAAAAPaBAAAAAAEA3wDAPgAABNADCADANwA=</HashCode>
+      <FileName>generalmidi.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
