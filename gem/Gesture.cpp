@@ -33,8 +33,8 @@
 #include "generalmidi.h"
 
 using std::cout;
-using std::cerr;
 using std::endl;
+using std::cerr;
 using std::abs;
 
 //
@@ -43,7 +43,7 @@ using std::abs;
 
 int Gesture::AbsSum() const
 {
-	int total = 0;
+	int total{ 0 };
 	for (auto val : m_values)
 	{
 		total += abs(val);
@@ -88,7 +88,7 @@ Gesture ParamBlock::GetRhythmGesture() const
 	}
 	else
 	{
-		cerr << "Error: missing rhythm gesture" << endl;
+		cerr << "Error: missing rhythm gesture\n";
 		throw std::runtime_error("");
 	}
 }
@@ -101,7 +101,7 @@ Gesture ParamBlock::GetPitchGesture() const
 	}
 	else
 	{
-		cerr << "Error: missing pitch gesture" << endl;
+		cerr << "Error: missing pitch gesture\n";
 		throw std::runtime_error("");
 	}
 }
@@ -114,7 +114,7 @@ Gesture ParamBlock::GetVelocityGesture() const
 	}
 	else
 	{
-		cerr << "Warning: missing velocity gesture" << endl;
+		cerr << "Warning: missing velocity gesture\n";
 		return make_gesture(24);
 	}
 }
@@ -127,7 +127,7 @@ Gesture ParamBlock::GetInstrumentGesture() const
 	}
 	else
 	{
-		cerr << "Warning: missing instrument gesture" << endl;
+		cerr << "Warning: missing instrument gesture\n";
 		return make_gesture(1);
 	}
 }
@@ -145,6 +145,6 @@ void Voice::SetVoiceNumberOnce(int num)
 	}
 	else
 	{
-		cout << "Voice number already set to " << m_voice_number << endl;
+		cout << "Voice number already set to " << m_voice_number << '\n';
 	}
 }

@@ -37,15 +37,15 @@ public:
 
     static void Enter(const char fn[], const char s[])
     {
-        std::cout << "** " << fn << " **" << std::endl;
-        std::cout << s << std::endl;
-        std::cout << "pause . . .";
+        std::cout << "** " << fn << " **\n";
+        std::cout << s << '\n';
+        std::cout << "pause..." << std::flush;
         std::cin.get();
     }
 
     static void Exit()
     {
-        std::cout << "pause . . .";
+        std::cout << "pause..." << std::flush;
         std::cin.get();
     }
 };

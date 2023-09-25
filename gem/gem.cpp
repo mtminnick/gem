@@ -35,7 +35,6 @@
 #include "piece.h"
 
 using std::cout;
-using std::endl;
 using std::cerr;
 
 void tests(MidiOut &midi_out)
@@ -70,7 +69,7 @@ void pieces(MidiOut &midi_out)
 }
 int main()
 {
-    int ret = 0;
+    int ret{ 0 };
     std::srand(static_cast<unsigned int>(std::time(0)));
 
     MidiOut::ShowInfo();
@@ -84,7 +83,7 @@ int main()
     }
     catch (const std::exception&)
     {
-        cerr << "Caught exception!" << endl;
+        cerr << "Caught exception!\n";
         ret = 1;
     }
 

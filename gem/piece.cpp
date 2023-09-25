@@ -35,7 +35,6 @@
 #include "Dictionary.h"
 
 using std::cout;
-using std::endl;
 
 void piece1(MidiOut &midi_out)
 {
@@ -46,9 +45,9 @@ void piece1(MidiOut &midi_out)
 	Voice v = make_voice(pb);
 	Piece p = make_piece(v);
 
-	cout << "** Piece 1 **" << endl;
+	cout << "** Piece 1 **\n";
 
-	Scheduler s;
+	Scheduler s{};
 	s.Play(midi_out, p);
 }
 
@@ -68,9 +67,9 @@ void piece2(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
-	cout << "** Piece 2 **" << endl;
+	cout << "** Piece 2 **\n";
 
-	Scheduler s;
+	Scheduler s{};
 	s.Play(midi_out, p);
 }
 
@@ -95,9 +94,9 @@ void piece3(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
-	cout << "** Piece 3 **" << endl;
+	cout << "** Piece 3 **\n";
 
-	Scheduler s;
+	Scheduler s{};
 	s.Play(midi_out, p);
 }
 
@@ -126,9 +125,9 @@ void piece4(MidiOut& midi_out)
 
 	Piece p = make_piece(v1, v2);
 
-	cout << "** Piece 4 **" << endl;
+	cout << "** Piece 4 **\n";
 
-	Scheduler s;
+	Scheduler s{};
 	s.Play(midi_out, p);
 }
 
@@ -164,8 +163,8 @@ void piece5(MidiOut& midi_out)
 	//Piece p = make_piece(v1, v2, v3, v4);
 	Piece p = make_piece(v1, v2, v3);
 
-	cout << "** Piece 5 **" << endl;
+	cout << "** Piece 5 **\n";
 
-	Scheduler s;
+	Scheduler s{};
 	s.Play(midi_out, p);
 }

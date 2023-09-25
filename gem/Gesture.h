@@ -33,10 +33,10 @@
 class Gesture
 {
 private:
-	std::vector<int> m_values;
+	std::vector<int> m_values{};
 
 public:
-	Gesture(std::vector<int> values) : m_values(values) {}
+	Gesture(std::vector<int> values) : m_values{ values } {}
 	Gesture() {};
 	void AddValue(int val) { m_values.push_back(val); }
 	// todo: consider returning an iterator
@@ -50,13 +50,13 @@ public:
 class ParamBlock
 {
 private:
-	std::vector<Gesture> m_gestures;
-	int m_duration;
+	std::vector<Gesture> m_gestures{};
+	int m_duration{};
 
 public:
-	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration(duration), m_gestures(gestures) {}
-	ParamBlock(int duration) : m_duration(duration) {}
-	ParamBlock() : m_duration(0) {};
+	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration{ duration }, m_gestures{ gestures } {}
+	ParamBlock(int duration) : m_duration{ duration } {}
+	ParamBlock() : m_duration{ 0 } {};
 	void AddGesture(Gesture g) { m_gestures.push_back(g); }
 	Gesture GetRhythmGesture() const;
 	Gesture GetPitchGesture() const;
@@ -70,14 +70,14 @@ public:
 class Voice
 {
 private:
-	std::vector<ParamBlock> m_param_blocks;
-	int m_voice_number;
+	std::vector<ParamBlock> m_param_blocks{};
+	int m_voice_number{};
 
 public:
 	static inline unsigned char constexpr kUnallocated = 0;
 
-	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number(kUnallocated), m_param_blocks(param_blocks) {}
-	Voice() : m_voice_number(kUnallocated) {}
+	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
+	Voice() : m_voice_number{ kUnallocated } {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
 	void SetVoiceNumberOnce(int num);
 	auto GetVoiceNumber() const { return m_voice_number; }

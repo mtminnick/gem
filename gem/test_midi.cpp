@@ -39,6 +39,7 @@
 
 using std::cout;
 using std::endl;
+using std::flush;
 using std::cin;
 using std::this_thread::sleep_for;
 using std::chrono::seconds;
@@ -77,7 +78,7 @@ void test_channels(MidiOut& mout)
 
     for (int i = 1; i < 17; i++)
     {
-        cout << "Channel = " << i << endl;
+        cout << "Channel = " << i << '\n';
 
         // Send note-on
         mout.NoteOn(i, key, velocity);
@@ -88,7 +89,7 @@ void test_channels(MidiOut& mout)
         // Send note-off
         mout.NoteOff(i, key);
 
-        //cout << "Enter for next: ";
+        //cout << "Enter for next: " << flush;
         //cin.get();
     }
 
@@ -107,7 +108,7 @@ void test_program_change(MidiOut& mout)
     // Channel 10 is percussion
     // Program numbers are 1 - 128
 
-    int program = 0;
+    int program{ 0 };
     while (true)
     {
         cout << "Enter program 1 through 128, 0 to quit: ";
@@ -116,7 +117,7 @@ void test_program_change(MidiOut& mout)
         {
             break;
         }
-        cout << " Program = " << program << endl;
+        cout << " Program = " << program << '\n';
 
         // Send program-change
         mout.ProgramChange(channel, program);
@@ -244,12 +245,12 @@ void test_durations()
 {
     Test::Enter(__func__, "Displays durations in milliseconds.");
 
-    cout << "W H Q 8th 16th 32nd" << endl;
-    cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << endl;
-    cout << "Dots" << endl;
-    cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << endl;
-    cout << "Triplets" << endl;
-    cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << endl;
+    cout << "W H Q 8th 16th 32nd\n";
+    cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << '\n';
+    cout << "Dots\n";
+    cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << '\n';
+    cout << "Triplets\n";
+    cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << '\n';
 
     Test::Exit();
 }
@@ -292,7 +293,7 @@ void test_pan(MidiOut& mout)
     mout.ProgramChange(chan, prog);
     
     // Test pan change before note-on
-    int pan = 0;    // full left
+    int pan{ 0 };    // full left
     mout.PanControlChange(chan, pan);
     mout.NoteOn(chan, key, velocity);
     sleep_for(milliseconds(2000));
@@ -336,7 +337,7 @@ void test_async_controller(MidiOut& mout)
     sleep_for(milliseconds(4000));
 
     // Apply controller change
-    cout << "Mod Wheel " << mod << endl;
+    cout << "Mod Wheel " << mod << '\n';
     mout.ModWheelControlChange(chan, mod);
     sleep_for(milliseconds(4000));
 
@@ -345,7 +346,7 @@ void test_async_controller(MidiOut& mout)
     sleep_for(milliseconds(1000));
 
     // Apply controller change before note on.
-    cout << "Mod Wheel " << mod << endl;
+    cout << "Mod Wheel " << mod << '\n';
     mout.ModWheelControlChange(chan, mod);
 
     // Turn note on

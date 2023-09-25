@@ -40,7 +40,6 @@ using std::chrono::milliseconds;
 using std::abs;
 using std::cout;
 using std::cerr;
-using std::endl;
 using std::thread;
 using std::vector;
 
@@ -61,14 +60,14 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	auto instrument_gesture = param_block.GetInstrumentGesture();
 
 	// Indicies are updated by Next() through a reference.
-	int rhythm_index = 0;
-	int pitch_index = 0;
-	int velocity_index = 0;
-	int instrument_index = 0;
+	int rhythm_index{ 0 };
+	int pitch_index{ 0 };
+	int velocity_index{ 0 };
+	int instrument_index{ 0 };
 
 	int const max_dur = param_block.GetDuration();
-	int total_dur = 0;
-	int last_instrument = 0;
+	int total_dur{ 0 };
+	int last_instrument{ 0 };
 
 	while (total_dur < max_dur)
 	{
@@ -77,7 +76,7 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 		if (dur <= 0)
 		{
 			// Negative value for duration is a rest - no other gestures are consumed.
-			//cout << dur << "<rest>" << endl;
+			//cout << dur << "<rest>\n";
 			sleep_for(milliseconds(absdur));
 		}
 		else
@@ -90,7 +89,7 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 				if (ins != last_instrument)
 				{
 					midi_out.ProgramChange(voice_num, ins);
-					//cout << "new ins " << ins << endl;
+					//cout << "new ins " << ins << '\n';
 					last_instrument = ins;
 				}
 			}
@@ -98,14 +97,14 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 			// Genearate the note-on with velocity
 			auto pitch = pitch_gesture.Next(pitch_index);
 			auto velocity = velocity_gesture.Next(velocity_index);
-			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << endl;
+			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << '\n';
 
 			midi_out.NoteOn(voice_num, pitch, velocity);
 			sleep_for(milliseconds(dur));
 			midi_out.NoteOff(voice_num, pitch);
 		}
 		total_dur += absdur;
-		//cout << "Total dur = " << total_dur << endl;
+		//cout << "Total dur = " << total_dur << '\n';
 	}
 
 	// Let things settle
@@ -115,27 +114,27 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 void Scheduler::Play(MidiOut& midi_out, Voice voice) const
 {
 	auto param_blocks = voice.GetParamBlocks();
-	//int i = 0;
+	[[maybe_unused]] int i{ 0 };
 	for (auto pb : param_blocks)
 	{
-		//cout << "Starting param block " << i++ << endl;
+		//cout << "Starting param block " << i++ << '\n';
 		Play(midi_out, voice.GetVoiceNumber(), pb);
 	}
 }
 
 void Scheduler::Play(MidiOut& midi_out, Piece piece) const
 {
-	cout << "Scheduler: running" << endl;
+	cout << "Scheduler: running\n";
 
 	AllocateVoices(piece);
 
 	vector<thread> voice_threads{};
 
 	// Start a thread for each voice.
-	int i = 0;
+	int i{ 0 };
 	for (auto v : piece)
 	{
-		cout << "Starting voice " << i++ << endl;
+		cout << "Starting voice " << i++ << '\n';
 
 		// Get address of overloaded const member function Play(midi_out, voice)
 		void (Scheduler:: *fpv)(MidiOut&, Voice) const = &Scheduler::Play;
@@ -150,7 +149,7 @@ void Scheduler::Play(MidiOut& midi_out, Piece piece) const
 		t.join();
 	}
 
-	cout << "Scheduler: done" << endl;
+	cout << "Scheduler: done\n";
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
@@ -160,8 +159,8 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 	// Skip channel 10 (percussion).
 	// Stop allocating when run out of channels.
 
-	int chan = 1;
-	int i = 0; // running count of allocated voices for logging
+	int chan{ 1 };
+	int i{ 0 }; // running count of allocated voices for logging
 	for (Voice & v : voices)
 	{
 		// Don't automatically assign the percussion channel.
@@ -171,11 +170,11 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		}
 		if (chan > kMaxChannelNumber)
 		{
-			cerr << "Warning: out of channels for voice " << i << endl;
+			cerr << "Warning: out of channels for voice " << i << '\n';
 		}
 		else
 		{
-			cout << "Setting voice " << i << " to chan " << chan << endl;
+			cout << "Setting voice " << i << " to chan " << chan << '\n';
 			v.SetVoiceNumberOnce(chan++);
 		}
 		++i;

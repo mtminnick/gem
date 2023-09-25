@@ -34,7 +34,6 @@
 
 using std::vector;
 using std::cerr;
-using std::endl;
 
 Dictionary build_dictionary()
 {
@@ -55,25 +54,25 @@ Dictionary build_dictionary()
 Gesture get_gesture(Dictionary const& dict, std::string const& key)
 {
 	// Pull out the gesture array that matches the key.
-	auto it = dict.find(key);
+	auto it{ dict.find(key) };
 	if (it == dict.end())
 	{
-		cerr << "Warning: no gesture array for key '" << key << "'" << endl;
+		cerr << "Warning: no gesture array for key '" << key << "'" << '\n';
 		// Such an empty gesture.
 		return make_gesture();
 	}
-	vector<Gesture> vect = it->second;
+	vector<Gesture> vect{ it->second };
 
 	// Return a random gesture from the gesture array.
-	size_t top = vect.size();
+	size_t top{ vect.size() };
 	if (top == 0)
 	{
-		cerr << "Warning: empty gesture array for key '" << key << "'" << endl;
+		cerr << "Warning: empty gesture array for key '" << key << "'" << '\n';
 		return make_gesture();
 	}
 	else
 	{
-		int idx = rand() % top;
+		size_t idx{ rand() % top };
 		return vect.at(idx);
 	}
 }

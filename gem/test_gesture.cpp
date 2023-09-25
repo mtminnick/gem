@@ -44,7 +44,7 @@ void test_gesture_wrap()
 
 	Gesture g = make_gesture(100, 200, 300);
 
-	int j = 0;
+	int j{ 0 };
 	for (int i = 0; i < 10; i++)
 	{
 		cout << g.Next(j) << " ";
