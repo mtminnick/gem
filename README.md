@@ -1,5 +1,5 @@
 # gem
-Gesture Modulation with Win32 MIDI
+Gesture Modulation with Win32 MIDI (WinMM MIDI 1.0)
 
 ## Using CoolSoft VirtualMidiSynth with arachosoft soundfont
 - https://coolsoft.altervista.org/en/virtualmidisynth
@@ -42,5 +42,6 @@ Gesture Modulation with Win32 MIDI
 - Try various sound fonts (https://coolsoft.altervista.org/en/virtualmidisynth#soundfonts)
 - Try with hardware synth
 - Sweeten output with DAW. Possibly record each channel separately and mix/pan in Audacity.
-- Create a UWP using C# MIDI
+- Create a UWP using C# MIDI (WinRT MIDI)
 - Try NAudio C# MIDI library
+- Update to MIDI 2.0 when available
