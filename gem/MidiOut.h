@@ -58,4 +58,6 @@ public:
 	void ProgramChange(int channel, int program);
 	void PanControlChange(int channel, int pan);
 	void ModWheelControlChange(int channel, int mod);
+	void SustainOnControlChange(int channel);
+	void SustainOffControlChange(int channel);
 };

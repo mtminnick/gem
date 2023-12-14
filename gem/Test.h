@@ -35,17 +35,21 @@ class Test
 public:
     Test() = delete;
 
-    static void Enter(const char fn[], const char s[])
+    static void Pause()
     {
-        std::cout << "** " << fn << " **\n";
-        std::cout << s << '\n';
         std::cout << "pause..." << std::flush;
         std::cin.get();
     }
 
+    static void Enter(const char fn[], const char s[])
+    {
+        std::cout << "** " << fn << " **\n";
+        std::cout << s << '\n';
+        Pause();
+    }
+
     static void Exit()
     {
-        std::cout << "pause..." << std::flush;
-        std::cin.get();
+        Pause();
     }
 };

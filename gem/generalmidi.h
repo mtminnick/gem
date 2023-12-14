@@ -32,8 +32,11 @@ inline unsigned char constexpr kNoteOn = 0x90;
 inline unsigned char constexpr kProgramChange = 0xc0;
 inline unsigned char constexpr kControlChange = 0xb0;
 
+inline unsigned char constexpr kControllerOn = 127;				// Switch on is > 64
+inline unsigned char constexpr kControllerOff = 0;				// Switch off is <= 63
 inline unsigned char constexpr kControllerModWheelMSB = 0x01;
 inline unsigned char constexpr kControllerPanMSB = 0x0a;
+inline unsigned char constexpr kControllerLegatoFootswitch = 0x44;
 
 inline unsigned char constexpr kPercussionChannel = 10;
 inline unsigned char constexpr kMaxChannelNumber = 16;

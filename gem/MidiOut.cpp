@@ -288,3 +288,13 @@ void MidiOut::ModWheelControlChange(int channel, int mod)
     // todo: support full resolution using control change using LSB
     ControlChange(ClampChannel(channel) - 1, kControllerModWheelMSB, ClampController(mod));
 }
+
+void MidiOut::SustainOnControlChange(int channel)
+{
+    ControlChange(ClampChannel(channel) - 1, kControllerLegatoFootswitch, kControllerOn);
+}
+
+void MidiOut::SustainOffControlChange(int channel)
+{
+    ControlChange(ClampChannel(channel) - 1, kControllerLegatoFootswitch, kControllerOff);
+}

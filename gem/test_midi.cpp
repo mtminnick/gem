@@ -320,7 +320,7 @@ void test_pan(MidiOut& mout)
 }
 
 // Works on some instruments (e.g. violin) and not others (e.g. flute)
-void test_async_controller(MidiOut& mout)
+void test_modwheel(MidiOut& mout)
 {
     Test::Enter(__func__, "Should hear violin vibrato during a note on and then applied before a note on.");
 
@@ -333,6 +333,7 @@ void test_async_controller(MidiOut& mout)
     mout.ProgramChange(chan, prog);
 
     // Apply controller change during note on.
+
     mout.NoteOn(chan, key, velocity);
     sleep_for(milliseconds(4000));
 
@@ -346,6 +347,7 @@ void test_async_controller(MidiOut& mout)
     sleep_for(milliseconds(1000));
 
     // Apply controller change before note on.
+
     cout << "Mod Wheel " << mod << '\n';
     mout.ModWheelControlChange(chan, mod);
 
@@ -377,6 +379,38 @@ void test_percussion(MidiOut& mout)
 
     cout << endl;
     sleep_for(milliseconds(1000));
+
+    Test::Exit();
+}
+
+// Does not work with coolsoft virtual midi synth, and not required by GM
+void test_sustain(MidiOut& mout)
+{
+    Test::Enter(__func__, "Should hear notes sustained after notes off.");
+
+    const int chan = 1;
+    const int prog = 1; // piano
+    const int key = c5;
+    const int velocity = 24;
+
+    mout.ProgramChange(chan, prog);
+
+    // Enable sustain
+    mout.SustainOnControlChange(chan);
+    cout << "Sustain On\n";
+
+    mout.NoteOn(chan, key, velocity);
+
+    sleep_for(milliseconds(1000));
+
+    mout.NoteOff(chan, key);
+    cout << "Notes off, should be sustained\n";
+
+    sleep_for(milliseconds(4000));
+
+    // Disable sustain
+    mout.SustainOffControlChange(chan);
+    cout << "Sustain Off\n";
 
     Test::Exit();
 }

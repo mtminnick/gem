@@ -158,6 +158,9 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 	// For each voice, set channel number to the next available channel number.
 	// Skip channel 10 (percussion).
 	// Stop allocating when run out of channels.
+	// If running out of channels, could assign multiple same-program voices to
+	// a single channel, but would run into trouble using Channel Volume Control Change
+	// since all voices on that channel would get the control change.
 
 	int chan{ 1 };
 	int i{ 0 }; // running count of allocated voices for logging

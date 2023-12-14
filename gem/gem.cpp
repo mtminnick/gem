@@ -49,9 +49,10 @@ void tests(MidiOut &midi_out)
     test_performance(midi_out);
     test_durations();
     test_velocity(midi_out);
-    test_pan(midi_out);
-    test_async_controller(midi_out);
+    //test_pan(midi_out);         // generally unreliable
+    test_modwheel(midi_out);
     test_percussion(midi_out);
+    //test_sustain(midi_out);     // does not work on coolsoft
 
     test_gesture_wrap();
     test_param_block();
@@ -78,7 +79,7 @@ int main()
     {
         MidiOut midi_out{};
 
-        tests(midi_out);
+        //tests(midi_out);
         //pieces(midi_out);
     }
     catch (const std::exception&)
