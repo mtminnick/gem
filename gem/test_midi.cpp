@@ -31,6 +31,7 @@
 #include <chrono>
 #include <thread>
 #include <string>
+#include <cassert>
 #include "test_midi.h"
 #include "Gesture.h"
 #include "Scheduler.h"
@@ -45,6 +46,7 @@ using std::this_thread::sleep_for;
 using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::string;
+using std::vector;
 
 void test_note_on_off(MidiOut& mout)
 {
@@ -411,6 +413,75 @@ void test_sustain(MidiOut& mout)
     // Disable sustain
     mout.SustainOffControlChange(chan);
     cout << "Sustain Off\n";
+
+    Test::Exit();
+}
+
+// Clever, but doesn't really have a slur effect because the note re-articulates.
+// Has a "chording" effect, but only between adjacent notes.
+void test_articulation(MidiOut& mout)
+{
+    Test::Enter(__func__, "Should hear normal articulation first, then legato.");
+
+    const int chan = 1;
+    const int prog = 57;// 41; // violin
+    const int velocity = 24;
+    const int num_keys = 4;
+    const int keys[]{ 69, 71, 73, 75 };
+    const int duration = 1000;
+    assert(duration > 0);
+
+    mout.ProgramChange(chan, prog);
+
+    // Play with normal articulation
+    for (int i = 0; i < num_keys; i++)
+    {
+        cout << "Note on: " << keys[i] << '\n';
+        mout.NoteOn(chan, keys[i], velocity);
+        sleep_for(milliseconds(duration));
+        cout << "Note off: " << keys[i] << '\n';
+        mout.NoteOff(chan, keys[i]);
+    }
+
+    Test::Pause();
+
+    const int delay = 200;
+    assert(delay > 0);
+    assert(delay < duration);
+
+    // Play with legato articulation.
+    for (int i = 0; i < num_keys; i++)
+    {
+        // Start the current note.
+        cout << "Note on: " << keys[i] << '\n';
+        mout.NoteOn(chan, keys[i], velocity);
+
+        // Sleep until the previous note should end
+        // (this is the overlap), unless this is the first note.
+        if (i > 0)
+        {
+            sleep_for(milliseconds(delay));
+
+            // End the previous note.
+            cout << "Note off: " << keys[i-1] << '\n';
+            mout.NoteOff(chan, keys[i-1]);
+
+            // Sleep for the rest of the current note's duration.
+            sleep_for(milliseconds(duration - delay));
+        }
+        else
+        {
+            // This is the first note, so sleep for the entire duration.
+            sleep_for(milliseconds(duration));
+        }
+    }
+
+    // End the last note.
+    if constexpr(num_keys > 0)
+    {
+        cout << "Note off: " << keys[num_keys - 1] << '\n';
+        mout.NoteOff(chan, keys[num_keys - 1]);
+    }
 
     Test::Exit();
 }

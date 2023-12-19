@@ -42,3 +42,4 @@ void test_pan(MidiOut& mout);
 void test_modwheel(MidiOut& mout);
 void test_percussion(MidiOut& mout);
 void test_sustain(MidiOut& mout);
+void test_articulation(MidiOut& mout);
