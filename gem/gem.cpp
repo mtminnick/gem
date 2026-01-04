@@ -79,6 +79,8 @@ int main()
     {
         MidiOut midi_out{};
 
+        test_note_on_off(midi_out);
+
         //tests(midi_out);
         //pieces(midi_out);
     }

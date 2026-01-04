@@ -69,6 +69,9 @@ MidiOut::MidiOut()
     }
     m_device_handle = dev_handle;
     cout << "MIDI OUT Device opened\n";
+    DWORD wVolume{ 0 };
+    midiOutGetVolume(m_device_handle, &wVolume);
+    cout << "Device Volume (R/L) = 0x" << hex << wVolume << '\n';
 }
 
 MidiOut::~MidiOut()
@@ -137,7 +140,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 
     // Running Status does not seem to work with Microsoft GS Wavetable Synth.
     // Works with CoolSoft VirtualMidiSynth.
-#define USE_RUNNING_STATUS
+//#define USE_RUNNING_STATUS
 #ifdef USE_RUNNING_STATUS
     if (bStatus == m_last_status)
     {

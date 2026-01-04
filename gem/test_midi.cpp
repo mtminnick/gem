@@ -48,13 +48,15 @@ using std::chrono::milliseconds;
 using std::string;
 using std::vector;
 
+constexpr int kDefaultVelocity = 0x7f;
+
 void test_note_on_off(MidiOut& mout)
 {
     Test::Enter(__func__, "Should hear a single note.");
 
     const int channel = 0x1;
     const int key = 0x3c;
-    const int velocity = 0x24;
+    const int velocity = kDefaultVelocity;
 
     // Send note-on
     mout.NoteOn(channel, key, velocity);
@@ -73,7 +75,7 @@ void test_channels(MidiOut& mout)
     Test::Enter(__func__, "Should hear the same note on each channel (channel 10 is Percussion).");
 
     const int key = 0x3c;
-    const int velocity = 0x24;
+    const int velocity = kDefaultVelocity;
 
     // Channel numbers are 1 - 16
     // Channel 10 is percussion
@@ -104,7 +106,7 @@ void test_program_change(MidiOut& mout)
 
     const int channel = 1;
     const int key = 0x3c;
-    const int velocity = 0x24;
+    const int velocity = kDefaultVelocity;
 
     // Channel numbers are 1 - 16
     // Channel 10 is percussion
@@ -290,7 +292,7 @@ void test_pan(MidiOut& mout)
     const int chan = 1;
     const int prog = flute;
     const int key = c5;
-    const int velocity = 24;
+    const int velocity = kDefaultVelocity;
 
     mout.ProgramChange(chan, prog);
     
@@ -329,7 +331,7 @@ void test_modwheel(MidiOut& mout)
     const int chan = 1;
     const int prog = 41; // violin
     const int key = c5;
-    const int velocity = 24;
+    const int velocity = kDefaultVelocity;
     const int mod = 127;
 
     mout.ProgramChange(chan, prog);
@@ -393,7 +395,7 @@ void test_sustain(MidiOut& mout)
     const int chan = 1;
     const int prog = 1; // piano
     const int key = c5;
-    const int velocity = 24;
+    const int velocity = kDefaultVelocity;
 
     mout.ProgramChange(chan, prog);
 
@@ -425,7 +427,7 @@ void test_articulation(MidiOut& mout)
 
     const int chan = 1;
     const int prog = 57;// 41; // violin
-    const int velocity = 24;
+    const int velocity = kDefaultVelocity;
     const int num_keys = 4;
     const int keys[]{ 69, 71, 73, 75 };
     const int duration = 1000;

@@ -34,6 +34,7 @@ Gesture Modulation with Win32 MIDI (WinMM MIDI 1.0)
 
 ## Microsoft GS Wavetable Synth Issues
 1. Running Status doesn't seem to work (works with VirtualMidiSynth). Turn off USE_RUNNING_STATUS in MidiOut.cpp.
+2. Device volume defaults to 0xFFFFFFFF (L/R), but that is low.
 
 ## General Issues
 1. All Control Change messages (for example pan) are subject to instrument implementation in soundfont; In genearal, you need a real GM hardware synth module for all CCs to work.
