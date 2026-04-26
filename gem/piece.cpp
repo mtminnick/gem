@@ -40,7 +40,7 @@ void piece1(MidiOut &midi_out)
 {
 	Gesture rhythm = make_gesture(1000, -500, 500);
 	Gesture pitch = make_gesture(c4, b4, a4);
-	int const pb_total_time = 10000;
+	const int pb_total_time = 10000;
 	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
 	Voice v = make_voice(pb);
 	Piece p = make_piece(v);
@@ -53,7 +53,7 @@ void piece1(MidiOut &midi_out)
 
 void piece2(MidiOut& midi_out)
 {
-	int const pb_total_time = 10000;
+	const int pb_total_time = 10000;
 
 	Gesture rhythm = make_gesture(nQ, -n8, n8);
 	Gesture pitch = make_gesture(c4, b4, a4);
@@ -75,7 +75,7 @@ void piece2(MidiOut& midi_out)
 
 void piece3(MidiOut& midi_out)
 {
-	int const pb_total_time = 10000;
+	const int pb_total_time = 10000;
 
 	Gesture rhy_slow	= make_gesture(nWd, nQd, nHd);
 	Gesture rhy_fast	= make_gesture(-nH, n32, n32, n32, -n8, n16, n32, -n8d);
@@ -102,7 +102,7 @@ void piece3(MidiOut& midi_out)
 
 void piece4(MidiOut& midi_out)
 {
-	int const pb_total_time = 15000;
+	const int pb_total_time = 15000;
 
 	Gesture rhy1 = make_gesture(nQd, -n8, n32, n32, -nQ, n16, -n8d, n16d, n16d, -nQ);
 	Gesture perc_instr1 = make_gesture(acoustic_bass_drum, high_tom, open_triangle, acoustic_snare, crash_cymbal_1);
@@ -133,7 +133,7 @@ void piece4(MidiOut& midi_out)
 
 void piece5(MidiOut& midi_out)
 {
-	int const pb_total_time = 20000;
+	const int pb_total_time = 20000;
 	const auto dict = build_dictionary();
 
 	Gesture vel = make_gesture(60);
@@ -164,6 +164,24 @@ void piece5(MidiOut& midi_out)
 	Piece p = make_piece(v1, v2, v3);
 
 	cout << "** Piece 5 **\n";
+
+	Scheduler s{};
+	s.Play(midi_out, p);
+}
+
+void piece6(MidiOut& midi_out)
+{
+	Gesture rhythm = make_gesture(1000, -500, 500);
+	Gesture pitch = make_gesture(c4, b4, a4);
+	Gesture velocity = make_gesture(100);
+	Gesture instrument = make_gesture(flute);
+	Gesture clusters = make_gesture(1, 2, 4);
+	const int pb_total_time = 10000;
+	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch, velocity, instrument, clusters);
+	Voice v = make_voice(pb);
+	Piece p = make_piece(v);
+
+	cout << "** Piece 6 **\n";
 
 	Scheduler s{};
 	s.Play(midi_out, p);

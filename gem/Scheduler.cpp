@@ -43,6 +43,17 @@ using std::cerr;
 using std::thread;
 using std::vector;
 
+static vector<int> MakeChord(int root, int cardinality)
+{
+	vector<int> pitches;
+	const int interval = 2; // todo: get this from a table
+	for (int i = 0; i < cardinality; i++)
+	{
+		pitches.push_back(root + i * interval);
+	}
+	return pitches;
+}
+
 // Voice thread.
 void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) const
 {
@@ -58,12 +69,14 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	auto pitch_gesture = param_block.GetPitchGesture();
 	auto velocity_gesture = param_block.GetVelocityGesture();
 	auto instrument_gesture = param_block.GetInstrumentGesture();
+	auto chord_gesture = param_block.GetChordGesture();
 
 	// Indicies are updated by Next() through a reference.
 	int rhythm_index{ 0 };
 	int pitch_index{ 0 };
 	int velocity_index{ 0 };
 	int instrument_index{ 0 };
+	int chord_index{ 0 };
 
 	int const max_dur = param_block.GetDuration();
 	int total_dur{ 0 };
@@ -99,9 +112,17 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 			auto velocity = velocity_gesture.Next(velocity_index);
 			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << '\n';
 
-			midi_out.NoteOn(voice_num, pitch, velocity);
+			auto pitches = MakeChord(pitch, chord_gesture.Next(chord_index));
+
+			for (auto p : pitches)
+			{
+				midi_out.NoteOn(voice_num, p, velocity);
+			}
 			sleep_for(milliseconds(dur));
-			midi_out.NoteOff(voice_num, pitch);
+			for (auto p : pitches)
+			{
+				midi_out.NoteOff(voice_num, p);
+			}
 		}
 		total_dur += absdur;
 		//cout << "Total dur = " << total_dur << '\n';

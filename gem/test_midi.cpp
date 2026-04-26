@@ -147,7 +147,7 @@ void test_polyphony(MidiOut& mout)
     int const chan2 = 2;
     int const prog1 = 53; // Choir Aahs
     int const prog2 = 1;  // Acoustic Grand Piano
-    int const velocity = 0x45;
+    int const velocity = 127;// 0x45;
     int const long_key = 60;
     int const short_key1 = 58;
     int const short_key2 = 66;

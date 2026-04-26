@@ -67,6 +67,7 @@ void pieces(MidiOut &midi_out)
     piece3(midi_out);
     piece4(midi_out);
     piece5(midi_out);
+    piece6(midi_out);
 }
 int main()
 {
@@ -79,7 +80,7 @@ int main()
     {
         MidiOut midi_out{};
 
-        test_note_on_off(midi_out);
+        piece6(midi_out);
 
         //tests(midi_out);
         //pieces(midi_out);

@@ -35,3 +35,4 @@ void piece2(MidiOut& midi_out);
 void piece3(MidiOut& midi_out);
 void piece4(MidiOut& midi_out);
 void piece5(MidiOut& midi_out);
+void piece6(MidiOut& midi_out);

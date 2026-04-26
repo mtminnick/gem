@@ -79,6 +79,7 @@ inline int constexpr kRhythmIndex = 0;
 inline int constexpr kPitchIndex = 1;
 inline int constexpr kVelocityIndex = 2;
 inline int constexpr kInstrumentIndex = 3;
+inline int constexpr kChordIndex = 4;
 
 Gesture ParamBlock::GetRhythmGesture() const
 {
@@ -115,7 +116,7 @@ Gesture ParamBlock::GetVelocityGesture() const
 	else
 	{
 		cerr << "Warning: missing velocity gesture\n";
-		return make_gesture(24);
+		return make_gesture(120);
 	}
 }
 
@@ -128,6 +129,19 @@ Gesture ParamBlock::GetInstrumentGesture() const
 	else
 	{
 		cerr << "Warning: missing instrument gesture\n";
+		return make_gesture(1);
+	}
+}
+
+Gesture ParamBlock::GetChordGesture() const
+{
+	if (m_gestures.size() > kChordIndex)
+	{
+		return m_gestures[kChordIndex];
+	}
+	else
+	{
+		cerr << "Warning: missing chord gesture\n";
 		return make_gesture(1);
 	}
 }

@@ -62,6 +62,7 @@ public:
 	Gesture GetPitchGesture() const;
 	Gesture GetVelocityGesture() const;
 	Gesture GetInstrumentGesture() const;
+	Gesture GetChordGesture() const;
 	auto GetDuration() const { return m_duration; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
