@@ -78,12 +78,19 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	int instrument_index{ 0 };
 	int chord_index{ 0 };
 
-	int const max_dur = param_block.GetDuration();
+	int max_dur = param_block.GetDuration();
 	int total_dur{ 0 };
 	int last_instrument{ 0 };
 
+	// GetDuration() can be updated from another thread, so check it on each loop iteration.
 	while (total_dur < max_dur)
 	{
+		if (GetStop())
+		{
+			cout << "Voice " << voice_num << ": stopping\n";
+			break;
+		}
+
 		auto dur = rhythm_gesture.Next(rhythm_index);
 		auto absdur = abs(dur);
 		if (dur <= 0)

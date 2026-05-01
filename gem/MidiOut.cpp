@@ -57,6 +57,9 @@ MidiOut::MidiOut()
     }
 
     // For now, use the first output device we find. Later, could ask user to choose.
+
+    SetIsRunningStatusSupported(0);
+
     UINT dev_num{ 0 };
     HMIDIOUT dev_handle{};
     MMRESULT mmr = midiOutOpen(&dev_handle, dev_num, NULL, 0, CALLBACK_NULL);
@@ -72,6 +75,35 @@ MidiOut::MidiOut()
     DWORD wVolume{ 0 };
     midiOutGetVolume(m_device_handle, &wVolume);
     cout << "Device Volume (R/L) = 0x" << hex << wVolume << '\n';
+
+    if (m_is_running_status_supported)
+    {
+        cout << "Device supports Running Status\n";
+    }
+    else
+    {
+        cout << "Device does not support Running Status\n";
+	}
+}
+
+void MidiOut::SetIsRunningStatusSupported(UINT dev_num)
+{
+    MIDIOUTCAPS moc{};
+    const UINT smoc{ static_cast<UINT>(sizeof(moc)) };
+    MMRESULT mmr{ midiOutGetDevCaps(dev_num, &moc, smoc) };
+    if (mmr != MMSYSERR_NOERROR)
+    {
+        wchar_t err_text[MAXERRORLENGTH]{};
+        static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
+        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        return;
+    }
+
+    const wchar_t* target = L"VirtualMIDISynth";
+    if (wcsstr(moc.szPname, target))
+    {
+        m_is_running_status_supported = true;
+	}
 }
 
 MidiOut::~MidiOut()
@@ -140,32 +172,33 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
 
     // Running Status does not seem to work with Microsoft GS Wavetable Synth.
     // Works with CoolSoft VirtualMidiSynth.
-#define USE_RUNNING_STATUS
-#ifdef USE_RUNNING_STATUS
-    if (bStatus == m_last_status)
+    if (m_is_running_status_supported)
     {
-        // Running Status.
-        u.bData[0] = bData1;    // first MIDI data byte 
-        u.bData[1] = bData2;    // second MIDI data byte 
-        u.bData[2] = 0;         // not used
-        u.bData[3] = 0;         // not used
-        //cout << "Running Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+        if (bStatus == m_last_status)
+        {
+            // Running Status.
+            u.bData[0] = bData1;    // first MIDI data byte 
+            u.bData[1] = bData2;    // second MIDI data byte 
+            u.bData[2] = 0;         // not used
+            u.bData[3] = 0;         // not used
+            //cout << "Running Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+        }
+        else
+        {
+            u.bData[0] = bStatus;   // MIDI status byte 
+            u.bData[1] = bData1;    // first MIDI data byte 
+            u.bData[2] = bData2;    // second MIDI data byte 
+            u.bData[3] = 0;         // not used
+            m_last_status = bStatus;
+            //cout << "New Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+        }
     }
-    else
-    {
+    else {
         u.bData[0] = bStatus;   // MIDI status byte 
         u.bData[1] = bData1;    // first MIDI data byte 
         u.bData[2] = bData2;    // second MIDI data byte 
         u.bData[3] = 0;         // not used
-        m_last_status = bStatus;
-        //cout << "New Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
     }
-#else
-    u.bData[0] = bStatus;   // MIDI status byte 
-    u.bData[1] = bData1;    // first MIDI data byte 
-    u.bData[2] = bData2;    // second MIDI data byte 
-    u.bData[3] = 0;         // not used
-#endif
 
     // Send the message.
     MMRESULT mmr{ midiOutShortMsg(m_device_handle, u.dwData) };

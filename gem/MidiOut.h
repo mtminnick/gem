@@ -37,6 +37,9 @@ private:
 	HMIDIOUT m_device_handle{ NULL };
 	// This Running Status is why functions must take MidiOut as non-const.
 	unsigned char m_last_status{ 0 };
+	bool m_is_running_status_supported{ false };
+	
+	void SetIsRunningStatusSupported(UINT dev_num);
 
 	void SendMIDIEvent(BYTE status, BYTE data1, BYTE data2);
 	unsigned char ClampChannel(int channel) const;

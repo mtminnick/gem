@@ -29,6 +29,7 @@
  */
 
 #include <vector>
+#include <mutex>
 #include "Scheduler.h"
 #include "Gesture.h"
 #include "MidiOut.h"
@@ -36,10 +37,22 @@
 class Scheduler
 {
 private:
+	mutable std::mutex m_stop_mutex;
+	bool m_stop{ false };
 	void AllocateVoices(std::vector<Voice>& voices) const;
 	void Play(MidiOut& midi_out, Voice voice) const;
 	void Play(MidiOut& midi_out, int voice_numm, ParamBlock param_block) const;
 
 public:
 	void Play(MidiOut& midi_out, Piece piece) const;
+	void SetStop()
+	{
+		std::lock_guard<std::mutex> lock(m_stop_mutex);
+		m_stop = true;
+	}
+	bool GetStop() const
+	{
+		std::lock_guard<std::mutex> lock(m_stop_mutex);
+		return m_stop;
+	}
 };

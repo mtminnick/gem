@@ -51,7 +51,7 @@ class ParamBlock
 {
 private:
 	std::vector<Gesture> m_gestures{};
-	int m_duration{};
+	int m_duration{0};
 
 public:
 	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration{ duration }, m_gestures{ gestures } {}
