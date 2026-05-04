@@ -34,11 +34,12 @@
 #include "Scheduler.h"
 #include "generalmidi.h"
 #include "Dictionary.h"
+#include "run_parser.h"
 
 using std::cout;
 using std::thread;
 
-void piece1(MidiOut &midi_out)
+void piece1()
 {
 	Gesture rhythm = make_gesture(1000, -500, 500);
 	Gesture pitch = make_gesture(c4, b4, a4);
@@ -50,10 +51,10 @@ void piece1(MidiOut &midi_out)
 	cout << "** Piece 1 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-void piece2(MidiOut& midi_out)
+void piece2()
 {
 	const int pb_total_time = 10000;
 
@@ -72,10 +73,10 @@ void piece2(MidiOut& midi_out)
 	cout << "** Piece 2 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-void piece3(MidiOut& midi_out)
+void piece3()
 {
 	const int pb_total_time = 10000;
 
@@ -99,10 +100,10 @@ void piece3(MidiOut& midi_out)
 	cout << "** Piece 3 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-void piece4(MidiOut& midi_out)
+void piece4()
 {
 	const int pb_total_time = 15000;
 
@@ -130,10 +131,10 @@ void piece4(MidiOut& midi_out)
 	cout << "** Piece 4 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-void piece5(MidiOut& midi_out)
+void piece5()
 {
 	const int pb_total_time = 20000;
 	const auto dict = build_dictionary();
@@ -168,10 +169,10 @@ void piece5(MidiOut& midi_out)
 	cout << "** Piece 5 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-void piece6(MidiOut& midi_out)
+void piece6()
 {
 	Gesture rhythm = make_gesture(1000, -500, 500);
 	Gesture pitch = make_gesture(c4, b4, a4);
@@ -186,50 +187,12 @@ void piece6(MidiOut& midi_out)
 	cout << "** Piece 6 **\n";
 
 	Scheduler s{};
-	s.Play(midi_out, p);
+	s.Play(p);
 }
 
-static void play_rt_piece(MidiOut& midi_out, Scheduler& s, Piece& p)
+void interactive_piece()
 {
-	s.Play(midi_out, p);
-}
+	cout << "** Interactive Piece **\n";
 
-void rt_piece(MidiOut& midi_out)
-{
-	Gesture pitch = make_gesture(c4);
-	Gesture pitch_b = make_gesture(cs3);
-
-	Gesture rhythm = make_gesture(1000, -1000);
-	const int pb_total_time = 10000;
-	ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch);
-	Voice v = make_voice(pb);
-	Piece p = make_piece(v);
-
-	cout << "** RT Piece **\n";
-	Scheduler s{};
-	thread play_thread{ play_rt_piece, std::ref(midi_out), std::ref(s), std::ref(p) };
-
-	cout << "Type carriage return to update parameter block\n";
-	std::string line;
-	std::getline(std::cin, line);
-	std::cout << "Stopping scheduler\n";
-	s.SetStop();
-	play_thread.join();
-
-	// Update the gestures, voices and parameter block to change the music and run play_thread again.
-
-	ParamBlock pb_b = make_param_block(pb_total_time, rhythm, pitch_b);
-	Voice v_b = make_voice(pb_b);
-	Piece p_b = make_piece(v_b);
-
-	cout << "** RT Piece B **\n";
-	Scheduler s_b{};
-	thread play_thread_b{ play_rt_piece, std::ref(midi_out), std::ref(s_b), std::ref(p_b) };
-
-	cout << "Type carriage return to update parameter block\n";
-	std::string line_b;
-	std::getline(std::cin, line_b);
-	std::cout << "Stopping scheduler\n";
-	s_b.SetStop();
-	play_thread_b.join();
+	run_parser();
 }

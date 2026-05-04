@@ -32,6 +32,8 @@
 #include <chrono>
 #include <thread>
 #include <cstdlib>
+#include <climits>
+
 #include "Scheduler.h"
 #include "generalmidi.h"
 
@@ -55,7 +57,7 @@ static vector<int> MakeChord(int root, int cardinality)
 }
 
 // Voice thread.
-void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) const
+void Scheduler::Play(int voice_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
 	// Run through rhythm gesture one time.
@@ -64,6 +66,8 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	// todo: apply order and value modulators to rhythm and value gestures
 	// todo: start separate threads to play async controllers like pitch wheel and mod wheel. They
 	//       will get their own rhythm gestures.
+
+	auto& midi_out = MidiOut::Instance();
 
 	auto rhythm_gesture = param_block.GetRhythmGesture();
 	auto pitch_gesture = param_block.GetPitchGesture();
@@ -79,6 +83,9 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	int chord_index{ 0 };
 
 	int max_dur = param_block.GetDuration();
+	if (max_dur == 0) {
+		max_dur = INT_MAX;
+	}
 	int total_dur{ 0 };
 	int last_instrument{ 0 };
 
@@ -139,18 +146,18 @@ void Scheduler::Play(MidiOut& midi_out, int voice_num, ParamBlock param_block) c
 	sleep_for(milliseconds(1000));
 }
 
-void Scheduler::Play(MidiOut& midi_out, Voice voice) const
+void Scheduler::Play(Voice voice) const
 {
 	auto param_blocks = voice.GetParamBlocks();
 	[[maybe_unused]] int i{ 0 };
 	for (auto pb : param_blocks)
 	{
 		//cout << "Starting param block " << i++ << '\n';
-		Play(midi_out, voice.GetVoiceNumber(), pb);
+		Play(voice.GetVoiceNumber(), pb);
 	}
 }
 
-void Scheduler::Play(MidiOut& midi_out, Piece piece) const
+void Scheduler::Play(Piece piece) const
 {
 	cout << "Scheduler: running\n";
 
@@ -164,12 +171,12 @@ void Scheduler::Play(MidiOut& midi_out, Piece piece) const
 	{
 		cout << "Starting voice " << i++ << '\n';
 
-		// Get address of overloaded const member function Play(midi_out, voice)
-		void (Scheduler:: *fpv)(MidiOut&, Voice) const = &Scheduler::Play;
+		// Get address of overloaded const member function Play(voice)
+		void (Scheduler:: *fpv)(Voice) const = &Scheduler::Play;
 
 		// First arg to thread constructor is pointer to member function, second arg is ref to valid object
 		// with this function, rest are args to the function.
-		voice_threads.push_back(thread(fpv, std::ref(*this), std::ref(midi_out), v));
+		voice_threads.push_back(thread(fpv, std::ref(*this), v));
 	}
 
 	for (auto & t : voice_threads)

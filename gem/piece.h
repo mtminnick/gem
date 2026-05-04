@@ -30,10 +30,10 @@
 
 #include "MidiOut.h"
 
-void piece1(MidiOut& midi_out);
-void piece2(MidiOut& midi_out);
-void piece3(MidiOut& midi_out);
-void piece4(MidiOut& midi_out);
-void piece5(MidiOut& midi_out);
-void piece6(MidiOut& midi_out);
-void rt_piece(MidiOut& midi_out);
+void piece1();
+void piece2();
+void piece3();
+void piece4();
+void piece5();
+void piece6();
+void interactive_piece();

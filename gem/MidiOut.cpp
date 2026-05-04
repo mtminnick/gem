@@ -44,6 +44,8 @@ using std::mutex;
 
 // Requires:Winmm.lib
 
+std::unique_ptr<MidiOut> MidiOut::m_instance;
+
 std::mutex g_midi_out_mutex{};  // protects device access
 
 MidiOut::MidiOut()

@@ -50,9 +50,11 @@ using std::vector;
 
 constexpr int kDefaultVelocity = 0x7f;
 
-void test_note_on_off(MidiOut& mout)
+void test_note_on_off()
 {
     Test::Enter(__func__, "Should hear a single note.");
+
+    auto& mout = MidiOut::Instance();
 
     const int channel = 0x1;
     const int key = 0x3c;
@@ -70,9 +72,11 @@ void test_note_on_off(MidiOut& mout)
     Test::Exit();
 }
 
-void test_channels(MidiOut& mout)
+void test_channels()
 {
     Test::Enter(__func__, "Should hear the same note on each channel (channel 10 is Percussion).");
+
+    auto& mout = MidiOut::Instance();
 
     const int key = 0x3c;
     const int velocity = kDefaultVelocity;
@@ -100,9 +104,11 @@ void test_channels(MidiOut& mout)
     Test::Exit();
 }
 
-void test_program_change(MidiOut& mout)
+void test_program_change()
 {
     Test::Enter(__func__, "Should hear a single note using the selected program (instrument).");
+
+    auto& mout = MidiOut::Instance();
 
     const int channel = 1;
     const int key = 0x3c;
@@ -139,9 +145,11 @@ void test_program_change(MidiOut& mout)
     Test::Exit();
 }
 
-void test_polyphony(MidiOut& mout)
+void test_polyphony()
 {
     Test::Enter(__func__, "Should hear a long sustained note with 3 short notes on top; second time with same instrument on top.");
+
+    auto& mout = MidiOut::Instance();
 
     int const chan1 = 1;
     int const chan2 = 2;
@@ -209,9 +217,11 @@ void test_polyphony(MidiOut& mout)
     Test::Exit();
 }
 
-void test_parameters(MidiOut& mout)
+void test_parameters()
 {
     Test::Enter(__func__, "Should see parameter range warnings.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 0;
     const int key = -1;
@@ -225,10 +235,10 @@ void test_parameters(MidiOut& mout)
     Test::Exit();
 }
 
-void test_performance(MidiOut& mout)
+void test_performance()
 {
     Test::Enter(__func__, "Two voices starting at the same time should sound like a single voice.");
-    
+
     int const pb_total_time = 10000;
 
 	Gesture rhythm = make_gesture(1000, -500, 500);
@@ -240,7 +250,7 @@ void test_performance(MidiOut& mout)
 	Piece p = make_piece(v1, v2);
 
 	Scheduler s;
-    s.Play(mout, p);
+    s.Play(p);
 
     Test::Exit();
 }
@@ -259,9 +269,11 @@ void test_durations()
     Test::Exit();
 }
 
-void test_velocity(MidiOut& mout)
+void test_velocity()
 {
     Test::Enter(__func__, "Should hear velocity increasing in steps.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 1;
     const int prog = 1;
@@ -285,9 +297,11 @@ void test_velocity(MidiOut& mout)
 }
 
 // Pan support depends on instrument in soundfont; generally unreliable.
-void test_pan(MidiOut& mout)
+void test_pan()
 {
     Test::Enter(__func__, "Should hear at least minimal panning.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 1;
     const int prog = flute;
@@ -324,9 +338,11 @@ void test_pan(MidiOut& mout)
 }
 
 // Works on some instruments (e.g. violin) and not others (e.g. flute)
-void test_modwheel(MidiOut& mout)
+void test_modwheel()
 {
     Test::Enter(__func__, "Should hear violin vibrato during a note on and then applied before a note on.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 1;
     const int prog = 41; // violin
@@ -363,9 +379,11 @@ void test_modwheel(MidiOut& mout)
     Test::Exit();
 }
 
-void test_percussion(MidiOut& mout)
+void test_percussion()
 {
     Test::Enter(__func__, "Should hear a note for every instrument on the percussion channel.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 10;
     const int velocity = 65;
@@ -388,9 +406,11 @@ void test_percussion(MidiOut& mout)
 }
 
 // Does not work with coolsoft virtual midi synth, and not required by GM
-void test_sustain(MidiOut& mout)
+void test_sustain()
 {
     Test::Enter(__func__, "Should hear notes sustained after notes off.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 1;
     const int prog = 1; // piano
@@ -421,9 +441,11 @@ void test_sustain(MidiOut& mout)
 
 // Clever, but doesn't really have a slur effect because the note re-articulates.
 // Has a "chording" effect, but only between adjacent notes.
-void test_articulation(MidiOut& mout)
+void test_articulation()
 {
     Test::Enter(__func__, "Should hear normal articulation first, then legato.");
+
+    auto& mout = MidiOut::Instance();
 
     const int chan = 1;
     const int prog = 57;// 41; // violin

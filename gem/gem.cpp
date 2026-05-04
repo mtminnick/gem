@@ -37,37 +37,37 @@
 using std::cout;
 using std::cerr;
 
-void tests(MidiOut &midi_out)
+void tests(MidiOut &)
 {
     // Note: tests are interactive on the command line.
 
-    test_note_on_off(midi_out);
-    test_channels(midi_out);
-    test_program_change(midi_out);
-    test_polyphony(midi_out);
-    test_parameters(midi_out);  // todo: investigate - makes a cool noise
-    test_performance(midi_out);
+    test_note_on_off();
+    test_channels();
+    test_program_change();
+    test_polyphony();
+    test_parameters();  // todo: investigate - makes a cool noise
+    test_performance();
     test_durations();
-    test_velocity(midi_out);
-    //test_pan(midi_out);         // generally unreliable
-    test_modwheel(midi_out);
-    test_percussion(midi_out);
-    //test_sustain(midi_out);     // does not work on coolsoft
+    test_velocity();
+    //test_pan();         // generally unreliable
+    test_modwheel();
+    test_percussion();
+    //test_sustain();     // does not work on coolsoft
 
     test_gesture_wrap();
     test_param_block();
-    test_voice_alloc(midi_out);
+    test_voice_alloc();
     test_dictionary();
 }
 
-void pieces(MidiOut &midi_out)
+void pieces(MidiOut &)
 {
-    piece1(midi_out);
-    piece2(midi_out);
-    piece3(midi_out);
-    piece4(midi_out);
-    piece5(midi_out);
-    piece6(midi_out);
+    piece1();
+    piece2();
+    piece3();
+    piece4();
+    piece5();
+    piece6();
 }
 int main()
 {
@@ -78,13 +78,15 @@ int main()
 
     try
     {
-        MidiOut midi_out{};
+        MidiOut::Create();
 
-        rt_piece(midi_out);
-        //test_note_on_off(midi_out);
+        interactive_piece();
+        //test_note_on_off();
 
-        //tests(midi_out);
-        //pieces(midi_out);
+        //tests();
+        //pieces();
+
+        MidiOut::Destroy();
     }
     catch (const std::exception&)
     {

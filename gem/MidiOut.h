@@ -28,6 +28,10 @@
  * either expressed or implied, of the FreeBSD Project.
  */
 
+#include <memory>
+#include <mutex>
+#include <stdexcept>
+
 #include <windows.h>
 #include <mmeapi.h>
 
@@ -35,6 +39,8 @@ class MidiOut
 {
 private:
 	HMIDIOUT m_device_handle{ NULL };
+	static std::unique_ptr<MidiOut> m_instance;
+
 	// This Running Status is why functions must take MidiOut as non-const.
 	unsigned char m_last_status{ 0 };
 	bool m_is_running_status_supported{ false };
@@ -50,10 +56,33 @@ private:
 	void ControlChange(unsigned char channel, unsigned char control, unsigned char value);
 
 public:
+
 	MidiOut();
 	~MidiOut();
+
 	MidiOut(MidiOut const& p) = delete;
 	MidiOut& operator=(const MidiOut& p) = delete;
+
+	static void Create()
+	{
+		if (m_instance) {
+			throw std::runtime_error("Singleton already created");
+		}
+		m_instance.reset(new MidiOut());
+	}
+
+	static MidiOut& Instance()
+	{
+		if (!m_instance) {
+			throw std::runtime_error("Singleton not created");
+		}
+		return *m_instance;
+	}
+
+	static void Destroy()
+	{
+		m_instance.reset();
+	}
 
 	static void ShowInfo();
 	void NoteOn(int channel, int key, int velocity);

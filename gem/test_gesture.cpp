@@ -70,7 +70,7 @@ void test_param_block()
 	Test::Exit();
 }
 
-void test_voice_alloc(MidiOut& midi_out)
+void test_voice_alloc()
 {
 	Test::Enter(__func__, "Observe many channel warnings due to too many voices requested.");
 
@@ -87,7 +87,7 @@ void test_voice_alloc(MidiOut& midi_out)
 	}
 
 	Scheduler s;
-	s.Play(midi_out, piece);
+	s.Play(piece);
 
 	Test::Exit();
 }
