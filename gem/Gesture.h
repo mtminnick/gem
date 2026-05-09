@@ -63,6 +63,7 @@ public:
 	Gesture GetVelocityGesture() const;
 	Gesture GetInstrumentGesture() const;
 	Gesture GetChordGesture() const;
+	void SetGesture(int index, Gesture g) { if (index < m_gestures.size()) { m_gestures[index] = g; } }
 	auto GetDuration() const { return m_duration; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
@@ -71,11 +72,11 @@ public:
 class Voice
 {
 private:
-	std::vector<ParamBlock> m_param_blocks{};
 	int m_voice_number{};
 
 public:
 	static inline unsigned char constexpr kUnallocated = 0;
+	std::vector<ParamBlock> m_param_blocks{};
 
 	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
 	Voice() : m_voice_number{ kUnallocated } {}

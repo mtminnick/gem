@@ -12,15 +12,16 @@ public:
         Continue,
         Stop,
         Start,
-        Quit
+        Quit,
+        MaybeStart
     };
 
     using CommandArgs = std::vector<std::string>;
-    using CommandFunc = std::function<int(const CommandArgs& args)>;
+    using CommandFunc = std::function<Result(const CommandArgs& args)>;
 
     void registerCommand(const std::string& name, CommandFunc func)
     {
-        commands_[name] = func;
+        m_commands[name] = func;
     }
 
     Result run()
@@ -47,34 +48,37 @@ public:
 
             const std::string& command = tokens[0];
 
-            if (command == "quit" || command == "exit") {
-                result = Result::Quit;
-                break;
-            }
-            if (command == "stop") {
-                result = Result::Stop;
-                break;
-            }
-            if (command == "start" || command == "submit") {
-                result = Result::Start;
-                break;
-            }
+            if (command == "autosubmit") {
+				m_auto_submit = !m_auto_submit;
+				std::cout << "autosubmit is now " << (m_auto_submit ? "on" : "off") << "\n";
+                continue;
+			}
 
-            auto it = commands_.find(command);
-            if (it == commands_.end()) {
+            auto it = m_commands.find(command);
+            if (it == m_commands.end()) {
                 std::cerr << "Unknown command: " << command << "\n";
                 continue;
             }
 
             CommandArgs args(tokens.begin() + 1, tokens.end());
-            it->second(args);
+            result = it->second(args);
+            if (result == Result::Quit || result == Result::Stop || result == Result::Start) {
+                break;
+			}
+            else if (result == Result::MaybeStart) {
+                if (m_auto_submit) {
+                    result = Result::Start;
+                    break;
+				}
+            }
         }
 
         return result;
     }
 
 private:
-    std::unordered_map<std::string, CommandFunc> commands_;
+    std::unordered_map<std::string, CommandFunc> m_commands;
+    bool m_auto_submit = true;
 
     static bool tokenize(const std::string& line, CommandArgs& tokens)
     {

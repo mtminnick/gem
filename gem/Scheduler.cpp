@@ -94,7 +94,7 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 	{
 		if (GetStop())
 		{
-			cout << "Voice " << voice_num << ": stopping\n";
+			//cout << "Voice " << voice_num << ": stopping\n";
 			break;
 		}
 
@@ -159,7 +159,7 @@ void Scheduler::Play(Voice voice) const
 
 void Scheduler::Play(Piece piece) const
 {
-	cout << "Scheduler: running\n";
+	//cout << "Scheduler: running\n";
 
 	AllocateVoices(piece);
 
@@ -169,7 +169,7 @@ void Scheduler::Play(Piece piece) const
 	int i{ 0 };
 	for (auto v : piece)
 	{
-		cout << "Starting voice " << i++ << '\n';
+		//cout << "Starting voice " << i++ << '\n';
 
 		// Get address of overloaded const member function Play(voice)
 		void (Scheduler:: *fpv)(Voice) const = &Scheduler::Play;
@@ -184,7 +184,7 @@ void Scheduler::Play(Piece piece) const
 		t.join();
 	}
 
-	cout << "Scheduler: done\n";
+	//cout << "Scheduler: done\n";
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
@@ -212,7 +212,7 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		}
 		else
 		{
-			cout << "Setting voice " << i << " to chan " << chan << '\n';
+			//cout << "Setting voice " << i << " to chan " << chan << '\n';
 			v.SetVoiceNumberOnce(chan++);
 		}
 		++i;
