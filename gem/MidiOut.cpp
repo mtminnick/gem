@@ -76,7 +76,7 @@ MidiOut::MidiOut()
     cout << "MIDI OUT Device opened\n";
     DWORD wVolume{ 0 };
     midiOutGetVolume(m_device_handle, &wVolume);
-    cout << "Device Volume (R/L) = 0x" << hex << wVolume << '\n';
+    cout << "Device Volume (R/L) = 0x" << hex << wVolume << dec << '\n';
 
     if (m_is_running_status_supported)
     {
@@ -155,7 +155,7 @@ void MidiOut::ShowInfo()
     cout << "wTechnology = " << moc.wTechnology << '\n';
     cout << "wVoices = " << moc.wVoices << '\n';
     cout << "wNotes = " << moc.wNotes << '\n';
-    cout << "wChannelMask (hex) = " << hex << moc.wChannelMask << dec << '\n';
+    cout << "wChannelMask = 0x" << hex << moc.wChannelMask << dec << '\n';
     cout << "dwSupport = " << moc.dwSupport << '\n';
     cout << endl;
 }
@@ -183,7 +183,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
             u.bData[1] = bData2;    // second MIDI data byte 
             u.bData[2] = 0;         // not used
             u.bData[3] = 0;         // not used
-            //cout << "Running Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+            //cout << "Running Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
         }
         else
         {
@@ -192,7 +192,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
             u.bData[2] = bData2;    // second MIDI data byte 
             u.bData[3] = 0;         // not used
             m_last_status = bStatus;
-            //cout << "New Status (" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+            //cout << "New Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
         }
     }
     else {

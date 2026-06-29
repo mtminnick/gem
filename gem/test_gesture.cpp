@@ -64,8 +64,8 @@ void test_param_block()
 
 	Gesture rhythm = pb.GetRhythmGesture();
 	Gesture pitch = pb.GetPitchGesture();
-	rhythm.Dump();
-	pitch.Dump();
+	rhythm.Print();
+	pitch.Print();
 
 	Test::Exit();
 }
@@ -100,7 +100,7 @@ void test_dictionary()
 	for (int i = 0; i < 10; i++)
 	{
 		Gesture ges = get_gesture(dict, "all-pitches");
-		ges.Dump();
+		ges.Print();
 	}
 
 	Test::Exit();

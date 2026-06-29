@@ -51,18 +51,29 @@ int Gesture::AbsSum() const
 	return total;
 }
 
-void Gesture::Dump() const
+void Gesture::Print() const
 {
-	for (auto val : m_values)
+	bool first = true;
+
+	for (const auto& val : m_values)
 	{
-		cout << val << " ";
+		if (!first)
+		{
+			std::cout << ",";
+		}
+		std::cout << val;
+		first = false;
 	}
-	cout << endl;
+	std::cout << std::endl;
 }
 
 int Gesture::Next(int& idx) const
 {
 	// todo: use iterator
+	if (m_values.size() == 0)
+	{
+		return 0;
+	}
 	if (idx >= m_values.size())
 	{
 		idx = 0;
@@ -74,12 +85,6 @@ int Gesture::Next(int& idx) const
 //
 // ParamBlock implementation.
 //
-
-inline int constexpr kRhythmIndex = 0;
-inline int constexpr kPitchIndex = 1;
-inline int constexpr kVelocityIndex = 2;
-inline int constexpr kInstrumentIndex = 3;
-inline int constexpr kChordIndex = 4;
 
 Gesture ParamBlock::GetRhythmGesture() const
 {

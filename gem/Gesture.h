@@ -30,6 +30,12 @@
 
 #include <vector>
 
+inline int constexpr kRhythmIndex = 0;
+inline int constexpr kPitchIndex = 1;
+inline int constexpr kVelocityIndex = 2;
+inline int constexpr kInstrumentIndex = 3;
+inline int constexpr kChordIndex = 4;
+
 class Gesture
 {
 private:
@@ -42,7 +48,7 @@ public:
 	// todo: consider returning an iterator
 	int Next(int& idx) const;
 	int AbsSum() const;
-	void Dump() const;
+	void Print() const;
 	Gesture& operator+=(int val) { AddValue(val); return *this; }
 	Gesture operator+(int val) const { return Gesture(*this) += val; }
 };

@@ -166,7 +166,7 @@ void Scheduler::Play(Piece piece) const
 	vector<thread> voice_threads{};
 
 	// Start a thread for each voice.
-	int i{ 0 };
+	[[maybe_unused]] int i{ 0 };
 	for (auto v : piece)
 	{
 		//cout << "Starting voice " << i++ << '\n';
