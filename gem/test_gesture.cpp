@@ -40,68 +40,65 @@ using std::cin;
 
 void test_gesture_wrap()
 {
-	Test::Enter(__func__, "wrapping gesture (100, 200, 300).");
+    Test::Enter(__func__, "wrapping gesture (100, 200, 300).");
 
-	Gesture g = make_gesture(100, 200, 300);
+    Gesture g = make_gesture(100, 200, 300);
 
-	int j{ 0 };
-	for (int i = 0; i < 10; i++)
-	{
-		cout << g.Next(j) << " ";
-	}
-	cout << endl;
+    int j{ 0 };
+    for (int i = 0; i < 10; i++) {
+        cout << g.Next(j) << " ";
+    }
+    cout << endl;
 
-	Test::Exit();
+    Test::Exit();
 }
 
 void test_param_block()
 {
-	Test::Enter(__func__, "retrieve gestures (1000, -2000, 3000), (100, 200, 300).");
+    Test::Enter(__func__, "retrieve gestures (1000, -2000, 3000), (100, 200, 300).");
 
-	Gesture r = make_gesture(1000, -2000, 3000);
-	Gesture p = make_gesture(100, 200, 300);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
+    Gesture r = make_gesture(1000, -2000, 3000);
+    Gesture p = make_gesture(100, 200, 300);
+    ParamBlock pb = make_param_block(r.AbsSum(), r, p);
 
-	Gesture rhythm = pb.GetRhythmGesture();
-	Gesture pitch = pb.GetPitchGesture();
-	rhythm.Print();
-	pitch.Print();
+    Gesture rhythm = pb.GetRhythmGesture();
+    Gesture pitch = pb.GetPitchGesture();
+    rhythm.Print();
+    pitch.Print();
 
-	Test::Exit();
+    Test::Exit();
 }
 
 void test_voice_alloc()
 {
-	Test::Enter(__func__, "Observe many channel warnings due to too many voices requested.");
+    Test::Enter(__func__, "Observe many channel warnings due to too many voices requested.");
 
-	Gesture r = make_gesture(100, -200, 300);
-	Gesture p = make_gesture(64, 65, 66);
-	ParamBlock pb = make_param_block(r.AbsSum(), r, p);
+    Gesture r = make_gesture(100, -200, 300);
+    Gesture p = make_gesture(64, 65, 66);
+    ParamBlock pb = make_param_block(r.AbsSum(), r, p);
 
-	int const too_many_voices = 17;
-	Piece piece;
-	for (int i = 0; i < too_many_voices; i++)
-	{
-		Voice v = make_voice(pb);
-		piece.push_back(v);
-	}
+    int const too_many_voices = 17;
+    Piece piece;
+    for (int i = 0; i < too_many_voices; i++) {
+        Voice v = make_voice(pb);
+        piece.push_back(v);
+    }
 
-	Scheduler s;
-	s.Play(piece);
+    Scheduler s;
+    s.Play(piece);
 
-	Test::Exit();
+    Test::Exit();
 }
 
 void test_dictionary()
 {
-	Test::Enter(__func__, "Access dictionary \"all-pitches\".");
+    Test::Enter(__func__, "Access dictionary \"all-pitches\".");
 
-	const auto dict = build_dictionary();
-	for (int i = 0; i < 10; i++)
-	{
-		Gesture ges = get_gesture(dict, "all-pitches");
-		ges.Print();
-	}
+    const auto dict = build_dictionary();
+    for (int i = 0; i < 10; i++) {
+        Gesture ges = get_gesture(dict, "all-pitches");
+        ges.Print();
+    }
 
-	Test::Exit();
+    Test::Exit();
 }

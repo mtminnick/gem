@@ -98,6 +98,11 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 			break;
 		}
 
+		if (param_block.IsMuted()) {
+			sleep_for(milliseconds(1000));
+			continue;
+		}
+
 		auto dur = rhythm_gesture.Next(rhythm_index);
 		auto absdur = abs(dur);
 		if (dur <= 0)

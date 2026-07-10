@@ -57,7 +57,8 @@ class ParamBlock
 {
 private:
 	std::vector<Gesture> m_gestures{};
-	int m_duration{0};
+	int m_duration{ 0 };
+	bool m_isMuted{ 0 };
 
 public:
 	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration{ duration }, m_gestures{ gestures } {}
@@ -71,6 +72,8 @@ public:
 	Gesture GetChordGesture() const;
 	void SetGesture(int index, Gesture g) { if (index < m_gestures.size()) { m_gestures[index] = g; } }
 	auto GetDuration() const { return m_duration; }
+	auto IsMuted() const { return m_isMuted; }
+	void SetIsMuted(bool isMuted) { m_isMuted = isMuted; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
 };
@@ -104,7 +107,7 @@ typedef std::vector<Voice> Piece;
 template<typename ... Ts>
 auto make_gesture(Ts... params)
 {
-    return Gesture{ std::vector<int>{ params... } };
+	return Gesture{ std::vector<int>{ params... } };
 }
 
 template<typename ... Ts>

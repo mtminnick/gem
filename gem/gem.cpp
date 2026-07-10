@@ -37,62 +37,63 @@
 using std::cout;
 using std::cerr;
 
-void tests(MidiOut &)
+void tests(MidiOut&)
 {
-    // Note: tests are interactive on the command line.
+	// Note: tests are interactive on the command line.
 
-    test_note_on_off();
-    test_channels();
-    test_program_change();
-    test_polyphony();
-    test_parameters();  // todo: investigate - makes a cool noise
-    test_performance();
-    test_durations();
-    test_velocity();
-    //test_pan();         // generally unreliable
-    test_modwheel();
-    test_percussion();
-    //test_sustain();     // does not work on coolsoft
+	test_note_on_off();
+	test_channels();
+	test_program_change();
+	test_polyphony();
+	test_parameters();  // todo: investigate - makes a cool noise
+	test_performance();
+	test_durations();
+	test_velocity();
+	//test_pan();         // generally unreliable
+	test_modwheel();
+	test_percussion();
+	//test_sustain();     // does not work on coolsoft
 
-    test_gesture_wrap();
-    test_param_block();
-    test_voice_alloc();
-    test_dictionary();
+	test_gesture_wrap();
+	test_param_block();
+	test_voice_alloc();
+	test_dictionary();
 }
 
-void pieces(MidiOut &)
+void pieces(MidiOut&)
 {
-    piece1();
-    piece2();
-    piece3();
-    piece4();
-    piece5();
-    piece6();
+	piece1();
+	piece2();
+	piece3();
+	piece4();
+	piece5();
+	piece6();
 }
+
 int main()
 {
-    int ret{ 0 };
-    std::srand(static_cast<unsigned int>(std::time(0)));
+	int ret{ 0 };
+	std::srand(static_cast<unsigned int>(std::time(0)));
 
-    MidiOut::ShowInfo();
+	MidiOut::ShowInfo();
 
-    try
-    {
-        MidiOut::Create();
+	try
+	{
+		MidiOut::Create();
 
-        interactive_piece();
-        //test_note_on_off();
+		interactive_piece();
+		//test_note_on_off();
 
-        //tests();
-        //pieces();
+		//tests();
+		//pieces();
 
-        MidiOut::Destroy();
-    }
-    catch (const std::exception&)
-    {
-        cerr << "Caught exception!\n";
-        ret = 1;
-    }
+		MidiOut::Destroy();
+	}
+	catch (const std::exception&)
+	{
+		cerr << "Caught exception!\n";
+		ret = 1;
+	}
 
-    return ret;
+	return ret;
 }

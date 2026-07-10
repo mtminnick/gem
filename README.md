@@ -46,3 +46,26 @@ Gesture Modulation with Win32 MIDI (WinMM MIDI 1.0)
 - Create a UWP using C# MIDI (WinRT MIDI)
 - Try NAudio C# MIDI library
 - Update to MIDI 2.0 when available
+- Need a GEM spec
+
+## Implement
+- save
+- load
+- cmd abbreviations
+- percussion <voice>, set nopercussion <voice>
+- disable and/or delete voice
+- revert
+- pitch, rhythm, instrument as strings
+- option <opt> on/off (auto-submit)
+- solo <voice> toggle
+- random gesture generator (compose-time)
+- random gesture picker (modulator)
+- command line history
+
+## Code
+- update under mutex instead of restart
+- Run format selection
+- Get rid of using
+- camelCase methods
+- snake_case variables
+- make scheduler stop flag an atomic, remove mutex

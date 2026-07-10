@@ -162,8 +162,8 @@ void Voice::SetVoiceNumberOnce(int num)
 	{
 		m_voice_number = num;
 	}
-	else
-	{
-		cout << "Voice number already set to " << m_voice_number << '\n';
-	}
+//	else
+//	{
+//		cout << "Voice number already set to " << m_voice_number << '\n';
+//	}
 }
