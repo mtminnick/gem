@@ -1,0 +1,7 @@
+add
+set 0 rhythm -1000
+set 0 pitch 60
+set 0 velocity 120
+set 0 instrument 1
+set 0 chord 1
+mute 00

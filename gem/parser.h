@@ -31,7 +31,7 @@ public:
         Result result{ Result::Continue };
 
         while (true) {
-            if (!m_input_redirected) {
+            if (m_input_redirected == 0) {
                 // Print the prompt.
                 std::cout << "> ";
                 std::cout.flush();
@@ -39,11 +39,12 @@ public:
 
             if (!std::getline(std::cin, line)) {
                 // EOF or stdin closed, possibly due to load command.
-                if (m_input_redirected) {
-                    m_input_redirected = false;
-                    result = Result::RedirectInput;
+                if (m_input_redirected == 0) {
+                    std::cerr << "Error reading input. Exiting.\n";
+                    return Result::Quit;
                 } else {
-                    result = Result::Quit;
+                    --m_input_redirected;
+                    result = Result::RedirectInput;
                 }
                 break;
             }
@@ -74,7 +75,7 @@ public:
             CommandArgs args(tokens.begin() + 1, tokens.end());
             result = it->second(args);
             if (result == Result::RedirectInput) {
-                m_input_redirected = true;
+                ++m_input_redirected;
                 continue;
             }
             if (result == Result::Quit || result == Result::Stop || result == Result::Start) {
@@ -93,7 +94,7 @@ public:
 private:
     std::unordered_map<std::string, CommandFunc> m_commands;
     bool m_auto_submit = true;
-    bool m_input_redirected = false;
+    size_t m_input_redirected = 0;
 
     static bool tokenize(const std::string& line, CommandArgs& tokens)
     {

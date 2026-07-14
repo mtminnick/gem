@@ -155,6 +155,8 @@
   <ItemGroup>
     <None Include="..\README.md" />
     <None Include="ClassDiagram.cd" />
+    <None Include="input.gem" />
+    <None Include="input2.gem" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

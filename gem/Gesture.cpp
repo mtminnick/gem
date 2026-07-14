@@ -29,6 +29,8 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <string>
+
 #include "Gesture.h"
 #include "generalmidi.h"
 
@@ -55,16 +57,30 @@ void Gesture::Print() const
 {
 	bool first = true;
 
-	for (const auto& val : m_values)
-	{
-		if (!first)
-		{
+	for (const auto& val : m_values) {
+		if (!first) {
 			std::cout << ",";
 		}
 		std::cout << val;
 		first = false;
 	}
 	std::cout << std::endl;
+}
+
+std::string Gesture::Serialize() const
+{
+	bool first = true;
+	std::string s;
+
+	for (const auto& val : m_values) {
+		if (!first) {
+			s += ",";
+		}
+		s += std::to_string(val);
+		first = false;
+	}
+
+	return s;
 }
 
 int Gesture::Next(int& idx) const

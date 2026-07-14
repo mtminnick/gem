@@ -8,13 +8,14 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <stack>
 
 // This piece is modified by run parser commands and copied to the active piece by the start command.
 Piece g_piece;
 
 // The load command saves stdin here.
-std::streambuf* g_streambuf = nullptr;
-std::ifstream g_input_file;
+std::stack<std::streambuf*> g_streambuf_stack;
+std::stack<std::ifstream> g_input_file_stack;
 
 static int paramLookup(const std::string& param_name)
 {
@@ -177,19 +178,71 @@ static CommandParser::Result cmdLoad(const std::vector<std::string>& args)
 	}
 	std::string file_name = args[0];
 	std::cout << "Loading file " << file_name << "\n";
-	g_input_file.open(file_name);
-	if (!g_input_file) {
+	g_input_file_stack.push(std::ifstream(file_name));
+	if (!g_input_file_stack.top()) {
 		std::cerr << "Unable to open file " << file_name << "\n";
+		g_input_file_stack.pop();
 		return CommandParser::Result::Continue;
 	}
 
 	// Save the original stream buffer.
-	g_streambuf = std::cin.rdbuf();
+	g_streambuf_stack.push(std::cin.rdbuf());
 
 	// Redirect std::cin to the file.
-	std::cin.rdbuf(g_input_file.rdbuf());
+	std::cin.rdbuf(g_input_file_stack.top().rdbuf());
 
 	return CommandParser::Result::RedirectInput;
+}
+
+static CommandParser::Result cmdSave(const std::vector<std::string>& args)
+{
+	namespace fs = std::filesystem;
+
+	if (args.size() < 1) {
+		std::cerr << "Usage: save <file_name>\n";
+		return CommandParser::Result::Continue;
+	}
+	std::string file_name = args[0];
+	std::cout << "Saving to file " << file_name << "\n";
+
+	// Check whether the file already exists.
+	if (fs::exists(file_name)) {
+		std::cout << "'" << file_name
+			<< "' already exists. Overwrite? (y/n): ";
+		std::string response;
+		std::getline(std::cin, response);
+		if (response.empty() ||
+			(response[0] != 'y' && response[0] != 'Y')) {
+			std::cout << "File not written.\n";
+			return CommandParser::Result::Continue;
+		}
+	}
+
+	// Open for writing (truncates existing file).
+	std::ofstream out(file_name);
+
+	if (!out) {
+		std::cerr << "Error: Unable to create file '"
+			<< file_name << "'.\n";
+		return CommandParser::Result::Continue;
+	}
+
+	size_t voice_num = 0;
+	for (auto& voice : g_piece) {
+		out << "add\n";
+		const ParamBlock& pb = voice.m_param_blocks[0];
+		out << "set " << voice_num << " rhythm " << pb.GetRhythmGesture().Serialize() << '\n';
+		out << "set " << voice_num << " pitch " << pb.GetPitchGesture().Serialize() << '\n';
+		out << "set " << voice_num << " velocity " << pb.GetVelocityGesture().Serialize() << '\n';
+		out << "set " << voice_num << " instrument " << pb.GetInstrumentGesture().Serialize() << '\n';
+		out << "set " << voice_num << " chord " << pb.GetChordGesture().Serialize() << '\n';
+		std::string s{ pb.IsMuted() ? "1" : "0" };
+		out << "mute " << voice_num << " " << s << "\n";
+		++voice_num;
+	}
+
+	std::cout << "Saved.\n";
+	return CommandParser::Result::Continue;
 }
 
 static CommandParser::Result cmdHelp(const std::vector<std::string>&)
@@ -206,6 +259,8 @@ static CommandParser::Result cmdHelp(const std::vector<std::string>&)
 	std::cout << "  add [percussion]\n";
 	std::cout << "  mute <voice#> <1|0\n";
 	std::cout << "  load <file_name>\n";
+	std::cout << "  save <file_name>\n";
+
 	return CommandParser::Result::Continue;
 }
 
@@ -237,6 +292,7 @@ static void init_parser(CommandParser& parser)
 	parser.registerCommand("add", cmdAdd);
 	parser.registerCommand("mute", cmdMute);
 	parser.registerCommand("load", cmdLoad);
+	parser.registerCommand("save", cmdSave);
 }
 
 static void play_rt_piece(Scheduler& s, Piece& p)
@@ -271,9 +327,15 @@ int run_parser()
 	{
 		result = parser.run();
 		if (result == CommandParser::Result::RedirectInput) {
+			if (g_streambuf_stack.empty() || g_input_file_stack.empty()) {
+				std::cerr << "Error: Stream buffer or input file stack is empty.\n";
+				continue;
+            }
 			// Restore std::cin.
-			std::cin.rdbuf(g_streambuf);
-            g_input_file.close();
+			std::cin.rdbuf(g_streambuf_stack.top());
+			g_streambuf_stack.pop();
+			g_input_file_stack.top().close();
+            g_input_file_stack.pop();
 			std::cout << "Redirected input finished.\n";
 			continue;
         }

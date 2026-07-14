@@ -29,6 +29,7 @@
  */
 
 #include <vector>
+#include <string>
 
 inline int constexpr kRhythmIndex = 0;
 inline int constexpr kPitchIndex = 1;
@@ -49,6 +50,7 @@ public:
 	int Next(int& idx) const;
 	int AbsSum() const;
 	void Print() const;
+	std::string Serialize() const;
 	Gesture& operator+=(int val) { AddValue(val); return *this; }
 	Gesture operator+(int val) const { return Gesture(*this) += val; }
 };
