@@ -192,7 +192,7 @@ void piece6()
 
 void interactive_piece()
 {
-	cout << "** Interactive Piece **\n";
+	cout << "\n** Interactive Piece **\n";
 
 	run_parser();
 }

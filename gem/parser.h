@@ -81,7 +81,7 @@ public:
             if (result == Result::Quit || result == Result::Stop || result == Result::Start) {
                 break;
 			} else if (result == Result::MaybeStart) {
-                if (m_auto_submit) {
+                if (m_auto_submit && m_input_redirected == 0) {
                     result = Result::Start;
                     break;
 				}

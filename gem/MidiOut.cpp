@@ -230,11 +230,11 @@ unsigned char MidiOut::ClampChannel(int channel) const
 unsigned char MidiOut::ClampKey(int key) const
 {
     if (key < 0) {
-        wcerr << "Warning: invalid key number " << key << '\n';
+        //wcerr << "Warning: invalid key number " << key << '\n';
         key = 0;
     }
     if (key > 127) {
-        wcerr << "Warning: invalid key number " << key << '\n';
+        //wcerr << "Warning: invalid key number " << key << '\n';
         key = 127;
     }
     return static_cast<unsigned char>(key);
@@ -244,11 +244,11 @@ unsigned char MidiOut::ClampKey(int key) const
 unsigned char MidiOut::ClampVelocity(int velocity) const
 {
     if (velocity < 1) {
-        wcerr << "Warning: invalid velocity " << velocity << '\n';
+        //wcerr << "Warning: invalid velocity " << velocity << '\n';
         velocity = 0;
     }
     if (velocity > 127) {
-        wcerr << "Warning: invalid velocity " << velocity << '\n';
+        //wcerr << "Warning: invalid velocity " << velocity << '\n';
         velocity = 127;
     }
     return static_cast<unsigned char>(velocity);
@@ -258,11 +258,11 @@ unsigned char MidiOut::ClampProgram(int program) const
 {
     // Program numbers are 1 - 128 (data value 0 - 127)
     if (program < 1) {
-        wcerr << "Warning: invalid program number " << program << '\n';
+        //wcerr << "Warning: invalid program number " << program << '\n';
         program = 1;
     }
     if (program > 128) {
-        wcerr << "Warning: invalid program number " << program << '\n';
+        //wcerr << "Warning: invalid program number " << program << '\n';
         program = 128;
     }
     return static_cast<unsigned char>(program);
@@ -272,11 +272,11 @@ unsigned char MidiOut::ClampController(int val) const
 {
     // Controller numbers are 0 - 127
     if (val < 0) {
-        wcerr << "Warning: invalid controller value " << val << '\n';
+        //wcerr << "Warning: invalid controller value " << val << '\n';
         val = 0;
     }
     if (val > 127) {
-        wcerr << "Warning: invalid controller value " << val << '\n';
+        //wcerr << "Warning: invalid controller value " << val << '\n';
         val = 127;
     }
     return static_cast<unsigned char>(val);

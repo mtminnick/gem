@@ -66,6 +66,8 @@ public:
 	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration{ duration }, m_gestures{ gestures } {}
 	ParamBlock(int duration) : m_duration{ duration } {}
 	ParamBlock() : m_duration{ 0 } {};
+	bool m_is_active{ false }; // only used in interactive mode
+
 	void AddGesture(Gesture g) { m_gestures.push_back(g); }
 	Gesture GetRhythmGesture() const;
 	Gesture GetPitchGesture() const;
@@ -88,13 +90,14 @@ private:
 public:
 	static inline unsigned char constexpr kUnallocated = 0;
 	std::vector<ParamBlock> m_param_blocks{};
+	bool m_is_active{ false }; // only used in interactive mode
 
 	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
 	Voice() : m_voice_number{ kUnallocated } {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
 	void SetVoiceNumberOnce(int num);
 	auto GetVoiceNumber() const { return m_voice_number; }
-	auto GetParamBlocks() const { return m_param_blocks; };
+	auto GetParamBlocks() const { return m_param_blocks; }
 	Voice& operator+=(ParamBlock pb) { AddParamBlock(pb); return *this; }
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }
 };
