@@ -138,6 +138,7 @@
     <ClCompile Include="Scheduler.cpp" />
     <ClCompile Include="test_gesture.cpp" />
     <ClCompile Include="test_midi.cpp" />
+    <ClCompile Include="WinUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Dictionary.h" />
@@ -151,12 +152,11 @@
     <ClInclude Include="Test.h" />
     <ClInclude Include="test_gesture.h" />
     <ClInclude Include="test_midi.h" />
+    <ClInclude Include="WinUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
     <None Include="ClassDiagram.cd" />
-    <None Include="input.gem" />
-    <None Include="input2.gem" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,6 +4,7 @@
 #include "Gesture.h"
 #include "generalmidi.h"
 #include "Scheduler.h"
+#include "WinUtil.h"
 
 #include <filesystem>
 #include <fstream>
@@ -22,6 +23,8 @@ static constexpr size_t kPercussionVoice = 10;
 // The load command saves stdin here.
 std::stack<std::streambuf*> g_streambuf_stack;
 std::stack<std::ifstream> g_input_file_stack;
+
+std::filesystem::path g_gemDirectory;
 
 static int paramLookup(const std::string& param_name)
 {
@@ -57,6 +60,21 @@ static int tryGetInt(const std::string& str, int default_value)
 	}
 	catch (const std::out_of_range&) {
 		std::cerr << "Integer out of range: " << str << "\n";
+		return default_value;
+	}
+}
+
+static float tryGetFloat(const std::string& str, float default_value)
+{
+	try {
+		return std::stof(str);
+	}
+	catch (const std::invalid_argument&) {
+		std::cerr << "Invalid float: " << str << "\n";
+		return default_value;
+	}
+	catch (const std::out_of_range&) {
+		std::cerr << "Float out of range: " << str << "\n";
 		return default_value;
 	}
 }
@@ -130,6 +148,13 @@ static void activateParamBlocks()
 	for (auto& voice : g_piece) {
 		voice.m_param_blocks[g_current_section].m_is_active = true;
     }
+}
+
+static void setParamBlockDurations(int duration)
+{
+	for (auto& voice : g_piece) {
+		voice.m_param_blocks[g_current_section].SetDuration(duration);
+	}
 }
 
 static CommandParser::Result cmdSet(const std::vector<std::string>& args)
@@ -224,17 +249,36 @@ static CommandParser::Result cmdMute(const std::vector<std::string>& args)
 	return CommandParser::Result::MaybeStart;
 }
 
+static CommandParser::Result cmdDuration(const std::vector<std::string>& args)
+{
+	if (args.size() < 1) {
+		std::cerr << "Usage: duration <duration_sec>\n";
+		return CommandParser::Result::Continue;
+	}
+	const float duration = tryGetFloat(args[0], 0.0f);
+	if (duration < 0.0f) {
+		std::cerr << "Invalid duration: " << duration << "\n";
+		return CommandParser::Result::Continue;
+	}
+    const int duration_ms = static_cast<int>(duration * 1000.0f); // Convert seconds to milliseconds
+	setParamBlockDurations(duration_ms);
+	return CommandParser::Result::MaybeStart;
+}
+
 static CommandParser::Result cmdLoad(const std::vector<std::string>& args)
 {
+	namespace fs = std::filesystem;
+
 	if (args.size() < 1) {
 		std::cerr << "Usage: load <file_name>\n";
 		return CommandParser::Result::Continue;
 	}
 	std::string file_name = args[0];
-	std::cout << "Loading file " << file_name << "\n";
-	g_input_file_stack.push(std::ifstream(file_name));
+    fs::path full_path = g_gemDirectory / file_name;
+	std::cout << "Loading file " << full_path << "\n";
+	g_input_file_stack.push(std::ifstream(full_path));
 	if (!g_input_file_stack.top()) {
-		std::cerr << "Unable to open file " << file_name << "\n";
+		std::cerr << "Unable to open file " << full_path << "\n";
 		g_input_file_stack.pop();
 		return CommandParser::Result::Continue;
 	}
@@ -257,11 +301,12 @@ static CommandParser::Result cmdSave(const std::vector<std::string>& args)
 		return CommandParser::Result::Continue;
 	}
 	std::string file_name = args[0];
-	std::cout << "Saving to file " << file_name << "\n";
+    fs::path full_path = g_gemDirectory / file_name;
+	std::cout << "Saving to file " << full_path << "\n";
 
 	// Check whether the file already exists.
-	if (fs::exists(file_name)) {
-		std::cout << "'" << file_name
+	if (fs::exists(full_path)) {
+		std::cout << "'" << full_path
 			<< "' already exists. Overwrite? (y/n): ";
 		std::string response;
 		std::getline(std::cin, response);
@@ -273,11 +318,11 @@ static CommandParser::Result cmdSave(const std::vector<std::string>& args)
 	}
 
 	// Open for writing (truncates existing file).
-	std::ofstream out(file_name);
+	std::ofstream out(full_path);
 
 	if (!out) {
 		std::cerr << "Error: Unable to create file '"
-			<< file_name << "'.\n";
+			<< full_path << "'.\n";
 		return CommandParser::Result::Continue;
 	}
 
@@ -321,6 +366,7 @@ static CommandParser::Result cmdHelp(const std::vector<std::string>&)
 	std::cout << "  load <file_name>\n";
 	std::cout << "  save <file_name>\n";
 	std::cout << "  section <section#>\n";
+    std::cout << "  duration <duration_sec>\n";
 
 	return CommandParser::Result::Continue;
 }
@@ -354,6 +400,7 @@ static void init_parser(CommandParser& parser)
 	parser.registerCommand("load", cmdLoad);
 	parser.registerCommand("save", cmdSave);
 	parser.registerCommand("section", cmdSection);
+	parser.registerCommand("duration", cmdDuration);
 }
 
 static void play_rt_piece(Scheduler& s, Piece& p)
@@ -374,7 +421,9 @@ int run_parser()
 
 	CommandParser::Result result{ CommandParser::Result::Continue };
 	std::cout << "Type \"help\" for help.\n";
-	std::cout << "Current path: " << std::filesystem::current_path() << '\n';
+
+	g_gemDirectory = getDefaultDirectory();
+	std::cout << "Save and Load path: " << g_gemDirectory << '\n';
 
 	auto stop_if_running = [](Scheduler* s, std::thread& play_thread, bool& is_running)
 	{

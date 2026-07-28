@@ -89,7 +89,6 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 	int total_dur{ 0 };
 	int last_instrument{ 0 };
 
-	// GetDuration() can be updated from another thread, so check it on each loop iteration.
 	while (total_dur < max_dur)
 	{
 		if (GetStop())

@@ -76,6 +76,7 @@ public:
 	Gesture GetChordGesture() const;
 	void SetGesture(int index, Gesture g) { if (index < m_gestures.size()) { m_gestures[index] = g; } }
 	auto GetDuration() const { return m_duration; }
+    void SetDuration(int duration) { m_duration = duration; }
 	auto IsMuted() const { return m_isMuted; }
 	void SetIsMuted(bool isMuted) { m_isMuted = isMuted; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
