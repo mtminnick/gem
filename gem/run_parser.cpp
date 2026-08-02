@@ -15,8 +15,8 @@
 Piece g_piece;
 size_t g_current_section;
 
-// Voice numbers run 0 to kNumVoices - 1. Voice 10 is set to the percussion channel (MIDI channel 10).
-static constexpr size_t kNumVoices = 15;
+// Voice numbers run 1 through kNumVoices. Voice 10 is set to the percussion channel (MIDI channel 10, encoded as 9).
+static constexpr size_t kNumVoices = 16;
 static constexpr size_t kNumParamBlocks = 20;
 static constexpr size_t kPercussionVoice = 10;
 
@@ -90,18 +90,24 @@ static std::vector<int> parseParamValues(const std::string& param_values_str)
 	return values;
 }
 
+static ParamBlock makeDefaultParamBlock()
+{
+    Gesture rhythm = make_gesture(-1000);
+    Gesture pitch = make_gesture(c4);
+    Gesture velocity = make_gesture(120);
+    Gesture instrument = make_gesture(1);
+    Gesture chord = make_gesture(1);
+    const int pb_total_time = 0;
+    ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch, velocity, instrument, chord);
+    pb.SetIsMuted(false);
+    return pb;
+}
+
 static Voice makeDefaultVoice()
 {
 	Voice v;
-	Gesture rhythm = make_gesture(-1000);
-	Gesture pitch = make_gesture(c4);
-	Gesture velocity = make_gesture(120);
-	Gesture instrument = make_gesture(1);
-	Gesture chord = make_gesture(1);
-	const int pb_total_time = 0;
 	for (size_t i = 0; i < kNumParamBlocks; ++i) {
-		ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch, velocity, instrument, chord);
-		pb.SetIsMuted(false);
+		ParamBlock pb = makeDefaultParamBlock();
 		v.AddParamBlock(pb);
 	}
 
@@ -111,14 +117,11 @@ static Voice makeDefaultVoice()
 static Piece makeDefaultPiece()
 {
 	Piece p;
-	std::cout << "Making " << kNumVoices << " voices. Voice " << kPercussionVoice << " is percussion.\n";
-	std::cout << "Making " << kNumParamBlocks << " sections.\n";
+	std::cout << "Making " << kNumVoices << " voices (0 - " << kNumVoices - 1 << ")\n";
+	std::cout << "Making " << kNumParamBlocks << " sections (0 - " << kNumParamBlocks - 1 << ")\n";
 
 	for (size_t i = 0; i < kNumVoices; ++i) {
 		Voice v = makeDefaultVoice();
-		if (i == kPercussionVoice) {
-			v.SetVoiceNumberOnce(kPercussionChannel);
-		}
 		p.push_back(v);
 	}
 
@@ -130,17 +133,28 @@ static Piece makePlayablePiece()
 	Piece p;
 	for (auto& voice : g_piece) {
 		if (voice.m_is_active) {
-            Voice voice_copy = voice;
+            Voice new_voice;
+            new_voice.SetChannelNumber(voice.GetChannelNumber());
 			for (auto& pb : voice.m_param_blocks) {
 				if (pb.m_is_active) {
-					voice_copy.AddParamBlock(pb);
+					new_voice.AddParamBlock(pb);
 				}
             }
-			p.push_back(voice_copy);
+			p.push_back(new_voice);
 		}
 	}
 
 	return p;
+}
+
+static bool isPieceEmpty(Piece& piece)
+{
+    for (auto& voice : piece) {
+        if (voice.m_is_active) {
+			return false;
+        }
+    }
+    return true;
 }
 
 static void activateParamBlocks()
@@ -196,18 +210,30 @@ static CommandParser::Result cmdShow(const std::vector<std::string>&)
 	for (auto& voice : g_piece) {
 		if (voice.m_is_active) {
 			const ParamBlock& pb = voice.m_param_blocks[g_current_section];
-			std::cout << "voice " << voice_num << ":\n";
-			std::cout << "  rhythm: ";
-			pb.GetRhythmGesture().Print();
-			std::cout << "  pitch: ";
-			pb.GetPitchGesture().Print();
-			std::cout << "  velocity: ";
-			pb.GetVelocityGesture().Print();
-			std::cout << "  instrument: ";
-			pb.GetInstrumentGesture().Print();
-			std::cout << "  chord: ";
-			pb.GetChordGesture().Print();
-			std::cout << "  mute: " << pb.IsMuted() << "\n";
+			if (pb.m_is_active) {
+                if (voice_num == 0) {	// all voices in a section have the same duration, so only print it once
+					int dur_ms = pb.GetDuration();
+					if (dur_ms > 0) {
+						float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
+						std::cout << "duration " << dur << " secs\n";
+					}
+					else {
+						std::cout << "duration " << "(looped)\n";
+					}
+				}
+				std::cout << "voice " << voice_num << ":\n";
+				std::cout << "  rhythm: ";
+				pb.GetRhythmGesture().Print();
+				std::cout << "  pitch: ";
+				pb.GetPitchGesture().Print();
+				std::cout << "  velocity: ";
+				pb.GetVelocityGesture().Print();
+				std::cout << "  instrument: ";
+				pb.GetInstrumentGesture().Print();
+				std::cout << "  chord: ";
+				pb.GetChordGesture().Print();
+				std::cout << "  mute: " << pb.IsMuted() << "\n";
+			}
 		}
 		++voice_num;
 	}
@@ -249,6 +275,23 @@ static CommandParser::Result cmdMute(const std::vector<std::string>& args)
 	return CommandParser::Result::MaybeStart;
 }
 
+static CommandParser::Result cmdChannel(const std::vector<std::string>& args)
+{
+	if (args.size() < 2) {
+		std::cerr << "Usage: channel <voice#> <chan#>\n";
+		return CommandParser::Result::Continue;
+	}
+	const int voice_num = tryGetInt(args[0], 0);
+	if (voice_num >= g_piece.size()) {
+		std::cerr << "Invalid voice number: " << voice_num << "\n";
+		return CommandParser::Result::Continue;
+	}
+	const int channel_num = tryGetInt(args[1], 0);
+	g_piece[voice_num].SetChannelNumber(channel_num);
+
+	return CommandParser::Result::MaybeStart;
+}
+
 static CommandParser::Result cmdDuration(const std::vector<std::string>& args)
 {
 	if (args.size() < 1) {
@@ -262,6 +305,35 @@ static CommandParser::Result cmdDuration(const std::vector<std::string>& args)
 	}
     const int duration_ms = static_cast<int>(duration * 1000.0f); // Convert seconds to milliseconds
 	setParamBlockDurations(duration_ms);
+	return CommandParser::Result::MaybeStart;
+}
+
+static CommandParser::Result cmdClear(const std::vector<std::string>& args)
+{
+	if (args.size() < 1) {
+		std::cerr << "Usage: clear [all|section|voice#]\n";
+		return CommandParser::Result::Continue;
+	}
+    if (args[0] == "all") {
+        g_piece = makeDefaultPiece();
+    }
+    else if (args[0] == "section") {
+        for (auto& voice : g_piece) {
+            voice.m_param_blocks[g_current_section].m_is_active = false;
+        }
+    }
+    else {
+        const int voice_num = tryGetInt(args[0], -1);
+        if (voice_num == -1) {
+            std::cerr << "Invalid voice number: " << args[0] << "\n";
+            return CommandParser::Result::Continue;
+        }
+        if (voice_num >= g_piece.size()) {
+            std::cerr << "Invalid voice number: " << voice_num << "\n";
+            return CommandParser::Result::Continue;
+        }
+        g_piece[voice_num] = makeDefaultVoice();
+    }
 	return CommandParser::Result::MaybeStart;
 }
 
@@ -329,15 +401,21 @@ static CommandParser::Result cmdSave(const std::vector<std::string>& args)
 	size_t voice_num = 0;
 	for (auto& voice : g_piece) {
 		if (voice.m_is_active) {
+            out << "# Voice " << voice_num << "\n";
+			out << "channel " << voice_num << " " << voice.GetChannelNumber() << "\n";
 			size_t pb_num = 0;
 			for (auto& pb : voice.m_param_blocks) {
 				if (pb.m_is_active) {
+                    out << "# Section " << pb_num << "\n";
 					out << "section " << pb_num << "\n";
-					out << "set " << voice_num << " rhythm " << pb.GetRhythmGesture().Serialize() << '\n';
-					out << "set " << voice_num << " pitch " << pb.GetPitchGesture().Serialize() << '\n';
-					out << "set " << voice_num << " velocity " << pb.GetVelocityGesture().Serialize() << '\n';
-					out << "set " << voice_num << " instrument " << pb.GetInstrumentGesture().Serialize() << '\n';
-					out << "set " << voice_num << " chord " << pb.GetChordGesture().Serialize() << '\n';
+					int dur_ms = pb.GetDuration();
+					float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
+					out << "duration " << dur << "\n";
+					out << "set " << voice_num << " rhythm " << pb.GetRhythmGesture().Serialize() << "\n";
+					out << "set " << voice_num << " pitch " << pb.GetPitchGesture().Serialize() << "\n";
+					out << "set " << voice_num << " velocity " << pb.GetVelocityGesture().Serialize() << "\n";
+					out << "set " << voice_num << " instrument " << pb.GetInstrumentGesture().Serialize() << "\n";
+					out << "set " << voice_num << " chord " << pb.GetChordGesture().Serialize() << "\n";
 					std::string s{ pb.IsMuted() ? "1" : "0" };
 					out << "mute " << voice_num << " " << s << "\n";
 				}
@@ -366,7 +444,9 @@ static CommandParser::Result cmdHelp(const std::vector<std::string>&)
 	std::cout << "  load <file_name>\n";
 	std::cout << "  save <file_name>\n";
 	std::cout << "  section <section#>\n";
-    std::cout << "  duration <duration_sec>\n";
+	std::cout << "  duration <duration_float_sec|0>\n";
+	std::cout << "  clear [all|section|voice#]\n";
+	std::cout << "  channel <voice#> <chan#>\n";
 
 	return CommandParser::Result::Continue;
 }
@@ -401,6 +481,8 @@ static void init_parser(CommandParser& parser)
 	parser.registerCommand("save", cmdSave);
 	parser.registerCommand("section", cmdSection);
 	parser.registerCommand("duration", cmdDuration);
+	parser.registerCommand("clear", cmdClear);
+	parser.registerCommand("channel", cmdChannel);
 }
 
 static void play_rt_piece(Scheduler& s, Piece& p)
@@ -423,13 +505,15 @@ int run_parser()
 	std::cout << "Type \"help\" for help.\n";
 
 	g_gemDirectory = getDefaultDirectory();
-	std::cout << "Save and Load path: " << g_gemDirectory << '\n';
+	std::cout << "Save and Load path: " << g_gemDirectory << "\n";
+    std::cout << "autosubmit is " << (parser.GetAutoSubmit() ? "on" : "off") << "\n";
 
 	auto stop_if_running = [](Scheduler* s, std::thread& play_thread, bool& is_running)
 	{
 		if (is_running) {
 			s->SetStop();
 			play_thread.join();
+			std::cout << "Piece done.\n";
 			is_running = false;
 		}
 	};
@@ -460,7 +544,7 @@ int run_parser()
 		}
 		if (result == CommandParser::Result::Start) {
 			stop_if_running(s, play_thread, is_running);
-			if (g_piece.empty()) {
+			if (isPieceEmpty(g_piece)) {
 				std::cerr << "No voices in the piece. Add voices before starting.\n";
 				continue;
 			} else {

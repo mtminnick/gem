@@ -38,6 +38,7 @@ inline unsigned char constexpr kControllerModWheelMSB = 0x01;
 inline unsigned char constexpr kControllerPanMSB = 0x0a;
 inline unsigned char constexpr kControllerLegatoFootswitch = 0x44;
 
+// These are 1-based channel numbers, but the MIDI protocol uses 0-based channel numbers.
 inline unsigned char constexpr kPercussionChannel = 10;
 inline unsigned char constexpr kMaxChannelNumber = 16;
 

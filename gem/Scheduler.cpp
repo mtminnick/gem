@@ -26,7 +26,7 @@
  * of the authors and should not be interpreted as representing official policies,
  * either expressed or implied, of the FreeBSD Project.
  */
-
+#define NOMINMAX
 #include <iostream>
 #include <vector>
 #include <chrono>
@@ -56,8 +56,7 @@ static vector<int> MakeChord(int root, int cardinality)
 	return pitches;
 }
 
-// Voice thread.
-void Scheduler::Play(int voice_num, ParamBlock param_block) const
+void Scheduler::Play(int channel_num, ParamBlock param_block) const
 {
 	// Rhythm gesture drives the output.
 	// Run through rhythm gesture one time.
@@ -89,16 +88,24 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 	int total_dur{ 0 };
 	int last_instrument{ 0 };
 
-	while (total_dur < max_dur)
-	{
-		if (GetStop())
-		{
-			//cout << "Voice " << voice_num << ": stopping\n";
-			break;
-		}
+	auto sleep_or_stop = [this](int duration) {
+        int remaining = duration;
+        while (remaining > 0) {
+            int sleep_time = std::min(remaining, 500);
+            sleep_for(milliseconds(sleep_time));
+            remaining -= sleep_time;
+            if (GetStop()) {
+                return true;
+            }
+        }
+		return false;
+	};
+	bool stop = false;
 
+	while (total_dur < max_dur && !stop)
+	{
 		if (param_block.IsMuted()) {
-			sleep_for(milliseconds(1000));
+			sleep_for(milliseconds(500));
 			continue;
 		}
 
@@ -108,19 +115,19 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 		{
 			// Negative value for duration is a rest - no other gestures are consumed.
 			//cout << dur << "<rest>\n";
-			sleep_for(milliseconds(absdur));
+			stop = sleep_or_stop(absdur);
 		}
 		else
 		{
 			// Apply the instrument change first, but only if it has changed.
 			// Don't send program change on percussion channel.
-			if (voice_num != kPercussionChannel)
+			if (channel_num != kPercussionChannel)
 			{
 				auto ins = instrument_gesture.Next(instrument_index);
 				if (ins != last_instrument)
 				{
-					midi_out.ProgramChange(voice_num, ins);
-					//cout << "new ins " << ins << '\n';
+					midi_out.ProgramChange(channel_num, ins);
+					//cout << "new ins " << ins << "\n";
 					last_instrument = ins;
 				}
 			}
@@ -128,36 +135,39 @@ void Scheduler::Play(int voice_num, ParamBlock param_block) const
 			// Genearate the note-on with velocity
 			auto pitch = pitch_gesture.Next(pitch_index);
 			auto velocity = velocity_gesture.Next(velocity_index);
-			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << '\n';
+			//cout << dur << "<p:" << pitch << ">" << "[v:" << velocity << "]" << "\n";
 
 			auto pitches = MakeChord(pitch, chord_gesture.Next(chord_index));
 
 			for (auto p : pitches)
 			{
-				midi_out.NoteOn(voice_num, p, velocity);
+				midi_out.NoteOn(channel_num, p, velocity);
 			}
-			sleep_for(milliseconds(dur));
+			stop = sleep_or_stop(dur);
 			for (auto p : pitches)
 			{
-				midi_out.NoteOff(voice_num, p);
+				midi_out.NoteOff(channel_num, p);
 			}
 		}
 		total_dur += absdur;
-		//cout << "Total dur = " << total_dur << '\n';
+		//cout << "Total dur = " << total_dur << "\n";
 	}
 
 	// Let things settle
-	sleep_for(milliseconds(1000));
+	//sleep_for(milliseconds(1000));
+
+	cout << "Channel " << channel_num << " done\n";
 }
 
+// Voice thread.
 void Scheduler::Play(Voice voice) const
 {
 	auto param_blocks = voice.GetParamBlocks();
 	[[maybe_unused]] int i{ 0 };
 	for (auto pb : param_blocks)
 	{
-		//cout << "Starting param block " << i++ << '\n';
-		Play(voice.GetVoiceNumber(), pb);
+		//cout << "Starting param block " << i++ << "\n";
+		Play(voice.GetChannelNumber(), pb);
 	}
 }
 
@@ -173,7 +183,7 @@ void Scheduler::Play(Piece piece) const
 	[[maybe_unused]] int i{ 0 };
 	for (auto v : piece)
 	{
-		//cout << "Starting voice " << i++ << '\n';
+		//cout << "Starting voice " << i++ << "\n";
 
 		// Get address of overloaded const member function Play(voice)
 		void (Scheduler:: *fpv)(Voice) const = &Scheduler::Play;
@@ -188,23 +198,26 @@ void Scheduler::Play(Piece piece) const
 		t.join();
 	}
 
-	//cout << "Scheduler: done\n";
+	cout << "Scheduler: done\n";
 }
 
 void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 {
 	// Static voice allocation algorithm.
 	// For each voice, set channel number to the next available channel number.
-	// Skip channel 10 (percussion).
-	// Stop allocating when run out of channels.
-	// If running out of channels, could assign multiple same-program voices to
-	// a single channel, but would run into trouble using Channel Volume Control Change
-	// since all voices on that channel would get the control change.
+    // Skip channel 9 (percussion), must be explicitly assigned to a voice.
+	// When out of channels, assign to channel 15.
 
-	int chan{ 1 };
+    int chan{ 1 };	// channel numbers are 1 - 16, 0 means unallocated
 	int i{ 0 }; // running count of allocated voices for logging
 	for (Voice & v : voices)
 	{
+		// Don't set chanel if already set.
+        if (v.GetChannelNumber() != Voice::kUnallocated) {
+            cout << "Voice " << i << " is pre-assigned to channel " << v.GetChannelNumber() << "\n";
+            ++i;
+            continue;
+        }
 		// Don't automatically assign the percussion channel.
 		if (chan == kPercussionChannel)
 		{
@@ -212,12 +225,13 @@ void Scheduler::AllocateVoices(std::vector<Voice>& voices) const
 		}
 		if (chan > kMaxChannelNumber)
 		{
-			cerr << "Warning: out of channels for voice " << i << '\n';
+			cerr << "Warning: out of channels for voice " << i << ", assigning to channel " << kMaxChannelNumber << "\n";
+			v.SetChannelNumber(kMaxChannelNumber);
 		}
 		else
 		{
-			//cout << "Setting voice " << i << " to chan " << chan << '\n';
-			v.SetVoiceNumberOnce(chan++);
+			cout << "Assigning voice " << i << " to chan " << chan << "\n";
+			v.SetChannelNumber(chan++);
 		}
 		++i;
 	}

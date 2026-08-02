@@ -57,7 +57,7 @@ Gesture get_gesture(Dictionary const& dict, std::string const& key)
 	auto it{ dict.find(key) };
 	if (it == dict.end())
 	{
-		cerr << "Warning: no gesture array for key '" << key << "'" << '\n';
+		cerr << "Warning: no gesture array for key '" << key << "'" << "\n";
 		// Such an empty gesture.
 		return make_gesture();
 	}
@@ -67,7 +67,7 @@ Gesture get_gesture(Dictionary const& dict, std::string const& key)
 	size_t top{ vect.size() };
 	if (top == 0)
 	{
-		cerr << "Warning: empty gesture array for key '" << key << "'" << '\n';
+		cerr << "Warning: empty gesture array for key '" << key << "'" << "\n";
 		return make_gesture();
 	}
 	else

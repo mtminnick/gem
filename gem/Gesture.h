@@ -86,18 +86,19 @@ public:
 class Voice
 {
 private:
-	int m_voice_number{};
+	int m_channel_number{};
 
 public:
-	static inline unsigned char constexpr kUnallocated = 0;
+    static int constexpr kUnallocated = 0;	// channel number is 1 - 16, 0 means unallocated
 	std::vector<ParamBlock> m_param_blocks{};
 	bool m_is_active{ false }; // only used in interactive mode
 
-	Voice(std::vector<ParamBlock> param_blocks) : m_voice_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
-	Voice() : m_voice_number{ kUnallocated } {}
+	Voice(std::vector<ParamBlock> param_blocks) : m_channel_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
+	Voice() : m_channel_number{ kUnallocated } {}
 	void AddParamBlock(ParamBlock pb) { m_param_blocks.push_back(pb); }
-	void SetVoiceNumberOnce(int num);
-	auto GetVoiceNumber() const { return m_voice_number; }
+	// Allows app to set a specific channel number, otherwise the voice allocator is used.
+	void SetChannelNumber(int num) { m_channel_number = num; }
+	auto GetChannelNumber() const { return m_channel_number; }
 	auto GetParamBlocks() const { return m_param_blocks; }
 	Voice& operator+=(ParamBlock pb) { AddParamBlock(pb); return *this; }
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }

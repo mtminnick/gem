@@ -123,8 +123,8 @@ void piece4()
 	Voice v2 = make_voice(pb2);
 
 	// Force voices to percussion channel
-	v1.SetVoiceNumberOnce(kPercussionChannel);
-	v2.SetVoiceNumberOnce(kPercussionChannel);
+	v1.SetChannelNumber(kPercussionChannel);
+	v2.SetChannelNumber(kPercussionChannel);
 
 	Piece p = make_piece(v1, v2);
 

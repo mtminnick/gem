@@ -44,7 +44,7 @@ public:
     static void Enter(const char fn[], const char s[])
     {
         std::cout << "** " << fn << " **\n";
-        std::cout << s << '\n';
+        std::cout << s << "\n";
         Pause();
     }
 

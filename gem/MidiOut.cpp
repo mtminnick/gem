@@ -69,14 +69,14 @@ MidiOut::MidiOut()
     {
         wchar_t err_text[MAXERRORLENGTH]{};
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutOpen returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        wcerr << "Error: midiOutOpen returns \"" << err_text << "\" (" << mmr << ")" << "\n";
         throw std::runtime_error("");
     }
     m_device_handle = dev_handle;
     cout << "MIDI OUT Device opened\n";
     DWORD wVolume{ 0 };
     midiOutGetVolume(m_device_handle, &wVolume);
-    cout << "Device Volume (R/L) = 0x" << hex << wVolume << dec << '\n';
+    cout << "Device Volume (R/L) = 0x" << hex << wVolume << dec << "\n";
 
     if (m_is_running_status_supported)
     {
@@ -97,7 +97,7 @@ void MidiOut::SetIsRunningStatusSupported(UINT dev_num)
     {
         wchar_t err_text[MAXERRORLENGTH]{};
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << "\n";
         return;
     }
 
@@ -115,7 +115,7 @@ MidiOut::~MidiOut()
     {
         wchar_t err_text[MAXERRORLENGTH]{};
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutClose returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        wcerr << "Error: midiOutClose returns \"" << err_text << "\" (" << mmr << ")" << "\n";
     }
     else
     {
@@ -126,7 +126,7 @@ MidiOut::~MidiOut()
 void MidiOut::ShowInfo()
 {
     UINT num_devs{ midiOutGetNumDevs() };
-    cout << "Number of MIDI output devices = " << num_devs << '\n';
+    cout << "Number of MIDI output devices = " << num_devs << "\n";
 
     if (num_devs < 1)
     {
@@ -143,20 +143,20 @@ void MidiOut::ShowInfo()
     {
         wchar_t err_text[MAXERRORLENGTH]{};
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        wcerr << "Error: midiOutGetDevCaps returns \"" << err_text << "\" (" << mmr << ")" << "\n";
         return;
     }
 
-    cout << "MIDI OUT Device " << dev_num << " MIDIOUTCAPS:" << '\n';
-    cout << "wMid = " << moc.wMid << '\n';
-    cout << "wPid = " << moc.wPid << '\n';
-    cout << "vDriverVersion = " << moc.vDriverVersion << '\n';
-    wcout << "szPname = " << moc.szPname << '\n';
-    cout << "wTechnology = " << moc.wTechnology << '\n';
-    cout << "wVoices = " << moc.wVoices << '\n';
-    cout << "wNotes = " << moc.wNotes << '\n';
-    cout << "wChannelMask = 0x" << hex << moc.wChannelMask << dec << '\n';
-    cout << "dwSupport = " << moc.dwSupport << '\n';
+    cout << "MIDI OUT Device " << dev_num << " MIDIOUTCAPS:" << "\n";
+    cout << "wMid = " << moc.wMid << "\n";
+    cout << "wPid = " << moc.wPid << "\n";
+    cout << "vDriverVersion = " << moc.vDriverVersion << "\n";
+    wcout << "szPname = " << moc.szPname << "\n";
+    cout << "wTechnology = " << moc.wTechnology << "\n";
+    cout << "wVoices = " << moc.wVoices << "\n";
+    cout << "wNotes = " << moc.wNotes << "\n";
+    cout << "wChannelMask = 0x" << hex << moc.wChannelMask << dec << "\n";
+    cout << "dwSupport = " << moc.dwSupport << "\n";
     cout << endl;
 }
 
@@ -183,7 +183,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
             u.bData[1] = bData2;    // second MIDI data byte 
             u.bData[2] = 0;         // not used
             u.bData[3] = 0;         // not used
-            //cout << "Running Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+            //cout << "Running Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << "\n";
         }
         else
         {
@@ -192,7 +192,7 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
             u.bData[2] = bData2;    // second MIDI data byte 
             u.bData[3] = 0;         // not used
             m_last_status = bStatus;
-            //cout << "New Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << '\n';
+            //cout << "New Status (0x" << hex << static_cast<unsigned int>(bStatus) << dec << ")" << "\n";
         }
     }
     else {
@@ -208,19 +208,19 @@ void MidiOut::SendMIDIEvent(BYTE bStatus, BYTE bData1, BYTE bData2)
     {
         wchar_t err_text[MAXERRORLENGTH]{};
         static_cast<void>(midiOutGetErrorText(mmr, err_text, MAXERRORLENGTH));
-        wcerr << "Error: midiOutShortMsg returns \"" << err_text << "\" (" << mmr << ")" << '\n';
+        wcerr << "Error: midiOutShortMsg returns \"" << err_text << "\" (" << mmr << ")" << "\n";
     }
 }
 
-// Channel numbers are 1 - 16 (status nibble 0 - 15)
+// Channel numbers are 1 - 16 (encoded as 0 - 15)
 unsigned char MidiOut::ClampChannel(int channel) const
 {
     if (channel < 1) {
-        wcerr << "Warning: invalid channel number " << channel << '\n';
+        wcerr << "Warning: invalid channel number " << channel << "\n";
         channel = 1;
     }
     if (channel > 16) {
-        wcerr << "Warning: invalid channel number " << channel << '\n';
+        wcerr << "Warning: invalid channel number " << channel << "\n";
         channel = 16;
     }
     return static_cast<unsigned char>(channel);
@@ -230,11 +230,11 @@ unsigned char MidiOut::ClampChannel(int channel) const
 unsigned char MidiOut::ClampKey(int key) const
 {
     if (key < 0) {
-        //wcerr << "Warning: invalid key number " << key << '\n';
+        //wcerr << "Warning: invalid key number " << key << "\n";
         key = 0;
     }
     if (key > 127) {
-        //wcerr << "Warning: invalid key number " << key << '\n';
+        //wcerr << "Warning: invalid key number " << key << "\n";
         key = 127;
     }
     return static_cast<unsigned char>(key);
@@ -244,11 +244,11 @@ unsigned char MidiOut::ClampKey(int key) const
 unsigned char MidiOut::ClampVelocity(int velocity) const
 {
     if (velocity < 1) {
-        //wcerr << "Warning: invalid velocity " << velocity << '\n';
+        //wcerr << "Warning: invalid velocity " << velocity << "\n";
         velocity = 0;
     }
     if (velocity > 127) {
-        //wcerr << "Warning: invalid velocity " << velocity << '\n';
+        //wcerr << "Warning: invalid velocity " << velocity << "\n";
         velocity = 127;
     }
     return static_cast<unsigned char>(velocity);
@@ -256,13 +256,13 @@ unsigned char MidiOut::ClampVelocity(int velocity) const
 
 unsigned char MidiOut::ClampProgram(int program) const
 {
-    // Program numbers are 1 - 128 (data value 0 - 127)
+    // Program numbers are 1 - 128 (encoded as 0 - 127)
     if (program < 1) {
-        //wcerr << "Warning: invalid program number " << program << '\n';
+        //wcerr << "Warning: invalid program number " << program << "\n";
         program = 1;
     }
     if (program > 128) {
-        //wcerr << "Warning: invalid program number " << program << '\n';
+        //wcerr << "Warning: invalid program number " << program << "\n";
         program = 128;
     }
     return static_cast<unsigned char>(program);
@@ -272,11 +272,11 @@ unsigned char MidiOut::ClampController(int val) const
 {
     // Controller numbers are 0 - 127
     if (val < 0) {
-        //wcerr << "Warning: invalid controller value " << val << '\n';
+        //wcerr << "Warning: invalid controller value " << val << "\n";
         val = 0;
     }
     if (val > 127) {
-        //wcerr << "Warning: invalid controller value " << val << '\n';
+        //wcerr << "Warning: invalid controller value " << val << "\n";
         val = 127;
     }
     return static_cast<unsigned char>(val);
@@ -301,7 +301,7 @@ void MidiOut::NoteOff(int channel, int key)
 
 void MidiOut::ProgramChange(int channel, int program)
 {
-    // Program numbers are 1 - 128 (data1 value 0 - 127)
+    // Program numbers are 1 - 128 (encoded as 0 - 127)
     unsigned char status{ static_cast<unsigned char>(kProgramChange + ClampChannel(channel) - 1) };
     unsigned char data1{ static_cast<unsigned char>(ClampProgram(program) - 1) };
     SendMIDIEvent(status, data1, 0);

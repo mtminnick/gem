@@ -25,6 +25,11 @@ public:
         m_commands[name] = func;
     }
 
+    bool GetAutoSubmit() const
+    {
+        return m_auto_submit;
+    }
+
     Result run()
     {
         std::string line;
@@ -47,6 +52,10 @@ public:
                     result = Result::RedirectInput;
                 }
                 break;
+            }
+
+            if (!line.empty() && line[0] == '#') {
+                continue;
             }
 
             CommandArgs tokens;
@@ -93,7 +102,7 @@ public:
 
 private:
     std::unordered_map<std::string, CommandFunc> m_commands;
-    bool m_auto_submit = true;
+    bool m_auto_submit = false;
     size_t m_input_redirected = 0;
 
     static bool tokenize(const std::string& line, CommandArgs& tokens)

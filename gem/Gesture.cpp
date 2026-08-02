@@ -166,20 +166,3 @@ Gesture ParamBlock::GetChordGesture() const
 		return make_gesture(1);
 	}
 }
-
-//
-// Voice implementation.
-//
-
-// Allows app to set explicit voice number before Scheduler allocation.
-void Voice::SetVoiceNumberOnce(int num)
-{
-	if (m_voice_number == Voice::kUnallocated)
-	{
-		m_voice_number = num;
-	}
-//	else
-//	{
-//		cout << "Voice number already set to " << m_voice_number << '\n';
-//	}
-}

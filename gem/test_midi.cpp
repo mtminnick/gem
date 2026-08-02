@@ -86,7 +86,7 @@ void test_channels()
 
     for (int i = 1; i < 17; i++)
     {
-        cout << "Channel = " << i << '\n';
+        cout << "Channel = " << i << "\n";
 
         // Send note-on
         mout.NoteOn(i, key, velocity);
@@ -127,7 +127,7 @@ void test_program_change()
         {
             break;
         }
-        cout << " Program = " << program << '\n';
+        cout << " Program = " << program << "\n";
 
         // Send program-change
         mout.ProgramChange(channel, program);
@@ -260,11 +260,11 @@ void test_durations()
     Test::Enter(__func__, "Displays durations in milliseconds.");
 
     cout << "W H Q 8th 16th 32nd\n";
-    cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << '\n';
+    cout << nW << " " << nH << " " << nQ << " " << n8 << " " << n16 << " " << n32 << "\n";
     cout << "Dots\n";
-    cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << '\n';
+    cout << nWd << " " << nHd << " " << nQd << " " << n8d << " " << n16d << " " << n32d << "\n";
     cout << "Triplets\n";
-    cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << '\n';
+    cout << nWt << " " << nHt << " " << nQt << " " << n8t << " " << n16t << " " << n32t << "\n";
 
     Test::Exit();
 }
@@ -358,7 +358,7 @@ void test_modwheel()
     sleep_for(milliseconds(4000));
 
     // Apply controller change
-    cout << "Mod Wheel " << mod << '\n';
+    cout << "Mod Wheel " << mod << "\n";
     mout.ModWheelControlChange(chan, mod);
     sleep_for(milliseconds(4000));
 
@@ -368,7 +368,7 @@ void test_modwheel()
 
     // Apply controller change before note on.
 
-    cout << "Mod Wheel " << mod << '\n';
+    cout << "Mod Wheel " << mod << "\n";
     mout.ModWheelControlChange(chan, mod);
 
     // Turn note on
@@ -460,10 +460,10 @@ void test_articulation()
     // Play with normal articulation
     for (int i = 0; i < num_keys; i++)
     {
-        cout << "Note on: " << keys[i] << '\n';
+        cout << "Note on: " << keys[i] << "\n";
         mout.NoteOn(chan, keys[i], velocity);
         sleep_for(milliseconds(duration));
-        cout << "Note off: " << keys[i] << '\n';
+        cout << "Note off: " << keys[i] << "\n";
         mout.NoteOff(chan, keys[i]);
     }
 
@@ -477,7 +477,7 @@ void test_articulation()
     for (int i = 0; i < num_keys; i++)
     {
         // Start the current note.
-        cout << "Note on: " << keys[i] << '\n';
+        cout << "Note on: " << keys[i] << "\n";
         mout.NoteOn(chan, keys[i], velocity);
 
         // Sleep until the previous note should end
@@ -487,7 +487,7 @@ void test_articulation()
             sleep_for(milliseconds(delay));
 
             // End the previous note.
-            cout << "Note off: " << keys[i-1] << '\n';
+            cout << "Note off: " << keys[i-1] << "\n";
             mout.NoteOff(chan, keys[i-1]);
 
             // Sleep for the rest of the current note's duration.
@@ -503,7 +503,7 @@ void test_articulation()
     // End the last note.
     if constexpr(num_keys > 0)
     {
-        cout << "Note off: " << keys[num_keys - 1] << '\n';
+        cout << "Note off: " << keys[num_keys - 1] << "\n";
         mout.NoteOff(chan, keys[num_keys - 1]);
     }
 
