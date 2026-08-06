@@ -60,13 +60,11 @@ class ParamBlock
 private:
 	std::vector<Gesture> m_gestures{};
 	int m_duration{ 0 };
-	bool m_isMuted{ 0 };
 
 public:
 	ParamBlock(int duration, std::vector<Gesture> gestures) : m_duration{ duration }, m_gestures{ gestures } {}
 	ParamBlock(int duration) : m_duration{ duration } {}
 	ParamBlock() : m_duration{ 0 } {};
-	bool m_is_active{ false }; // only used in interactive mode
 
 	void AddGesture(Gesture g) { m_gestures.push_back(g); }
 	Gesture GetRhythmGesture() const;
@@ -77,8 +75,6 @@ public:
 	void SetGesture(int index, Gesture g) { if (index < m_gestures.size()) { m_gestures[index] = g; } }
 	auto GetDuration() const { return m_duration; }
     void SetDuration(int duration) { m_duration = duration; }
-	auto IsMuted() const { return m_isMuted; }
-	void SetIsMuted(bool isMuted) { m_isMuted = isMuted; }
 	ParamBlock& operator+=(Gesture g) { AddGesture(g); return *this; }
 	ParamBlock operator+(Gesture g) const { return ParamBlock(*this) += g; }
 };
@@ -87,11 +83,11 @@ class Voice
 {
 private:
 	int m_channel_number{};
+	bool m_isMuted{ 0 };
 
 public:
     static int constexpr kUnallocated = 0;	// channel number is 1 - 16, 0 means unallocated
 	std::vector<ParamBlock> m_param_blocks{};
-	bool m_is_active{ false }; // only used in interactive mode
 
 	Voice(std::vector<ParamBlock> param_blocks) : m_channel_number{ kUnallocated }, m_param_blocks{ param_blocks } {}
 	Voice() : m_channel_number{ kUnallocated } {}
@@ -100,6 +96,8 @@ public:
 	void SetChannelNumber(int num) { m_channel_number = num; }
 	auto GetChannelNumber() const { return m_channel_number; }
 	auto GetParamBlocks() const { return m_param_blocks; }
+	auto IsMuted() const { return m_isMuted; }
+	void SetIsMuted(bool isMuted) { m_isMuted = isMuted; }
 	Voice& operator+=(ParamBlock pb) { AddParamBlock(pb); return *this; }
 	Voice operator+(ParamBlock pb) const { return Voice(*this) += pb; }
 };

@@ -13,7 +13,6 @@
 
 // This piece is modified by run parser commands and copied to the active piece by the start command.
 Piece g_piece;
-size_t g_current_section;
 
 // Voice numbers run 1 through kNumVoices. Voice 10 is set to the percussion channel (MIDI channel 10, encoded as 9).
 static constexpr size_t kNumVoices = 16;
@@ -44,7 +43,6 @@ static int paramLookup(const std::string& param_name)
 		return kChordIndex;
 	}
 	else {
-		std::cerr << "Unknown parameter name: " << param_name << "\n";
 		return -1;
 	}
 }
@@ -99,106 +97,44 @@ static ParamBlock makeDefaultParamBlock()
     Gesture chord = make_gesture(1);
     const int pb_total_time = 0;
     ParamBlock pb = make_param_block(pb_total_time, rhythm, pitch, velocity, instrument, chord);
-    pb.SetIsMuted(false);
     return pb;
 }
 
 static Voice makeDefaultVoice()
 {
 	Voice v;
-	for (size_t i = 0; i < kNumParamBlocks; ++i) {
-		ParamBlock pb = makeDefaultParamBlock();
-		v.AddParamBlock(pb);
-	}
-
+    v.AddParamBlock(makeDefaultParamBlock());
 	return v;
-}
-
-static Piece makeDefaultPiece()
-{
-	Piece p;
-	std::cout << "Making " << kNumVoices << " voices (0 - " << kNumVoices - 1 << ")\n";
-	std::cout << "Making " << kNumParamBlocks << " sections (0 - " << kNumParamBlocks - 1 << ")\n";
-
-	for (size_t i = 0; i < kNumVoices; ++i) {
-		Voice v = makeDefaultVoice();
-		p.push_back(v);
-	}
-
-	return p;
-}
-
-static Piece makePlayablePiece()
-{
-	Piece p;
-	for (auto& voice : g_piece) {
-		if (voice.m_is_active) {
-            Voice new_voice;
-            new_voice.SetChannelNumber(voice.GetChannelNumber());
-			for (auto& pb : voice.m_param_blocks) {
-				if (pb.m_is_active) {
-					new_voice.AddParamBlock(pb);
-				}
-            }
-			p.push_back(new_voice);
-		}
-	}
-
-	return p;
-}
-
-static bool isPieceEmpty(Piece& piece)
-{
-    for (auto& voice : piece) {
-        if (voice.m_is_active) {
-			return false;
-        }
-    }
-    return true;
-}
-
-static void activateParamBlocks()
-{
-	for (auto& voice : g_piece) {
-		voice.m_param_blocks[g_current_section].m_is_active = true;
-    }
-}
-
-static void setParamBlockDurations(int duration)
-{
-	for (auto& voice : g_piece) {
-		voice.m_param_blocks[g_current_section].SetDuration(duration);
-	}
 }
 
 static CommandParser::Result cmdSet(const std::vector<std::string>& args)
 {
-	if (args.size() < 3) {
-		std::cerr << "Usage: set <voice#> <param_name> <param_value,param_value...>\n";
+	if (args.size() < 4) {
+		std::cerr << "Usage: set <voice#> <param_block#> <param_name> <param_value,>...\n";
 		return CommandParser::Result::Continue;
 	}
-
 	const int voice_num = tryGetInt(args[0], 0);
-	const std::string& param_name = args[1];
-	const std::string& param_value = args[2];
+    const int pb_num = tryGetInt(args[1], 0);
+	const std::string& param_name = args[2];
+	const std::string& param_value = args[3];
 
-	std::cout << voice_num << " " << param_name << " " << param_value << "\n";
 	if (voice_num >= g_piece.size()) {
 		std::cerr << "Invalid voice number: " << voice_num << "\n";
 		return CommandParser::Result::Continue;
 	}
+	if (pb_num >= g_piece[voice_num].m_param_blocks.size()) {
+		std::cerr << "Invalid param block number: " << pb_num << "\n";
+		return CommandParser::Result::Continue;
+	}
 	int param_index = paramLookup(param_name);
 	if (param_index == -1) {
+		std::cerr << "Unknown parameter name: " << param_name << "\n";
 		return CommandParser::Result::Continue;
 	}
 	Gesture gesture{ parseParamValues(param_value) };
-	gesture.Print();
+	//gesture.Print();
 
-	g_piece[voice_num].m_param_blocks[g_current_section].SetGesture(param_index, gesture);
-	// Once a gesture is set, the voice is active until cleared.
-	g_piece[voice_num].m_is_active = true;
-	// Once a gesture is set, the current section in every voice is active until cleared.
-	activateParamBlocks();
+	g_piece[voice_num].m_param_blocks[pb_num].SetGesture(param_index, gesture);
 
 	return CommandParser::Result::MaybeStart;
 }
@@ -206,61 +142,43 @@ static CommandParser::Result cmdSet(const std::vector<std::string>& args)
 static CommandParser::Result cmdShow(const std::vector<std::string>&)
 {
     size_t voice_num = 0;
-	std::cout << "section: " << g_current_section << " \n";
 	for (auto& voice : g_piece) {
-		if (voice.m_is_active) {
-			const ParamBlock& pb = voice.m_param_blocks[g_current_section];
-			if (pb.m_is_active) {
-                if (voice_num == 0) {	// all voices in a section have the same duration, so only print it once
-					int dur_ms = pb.GetDuration();
-					if (dur_ms > 0) {
-						float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
-						std::cout << "duration " << dur << " secs\n";
-					}
-					else {
-						std::cout << "duration " << "(looped)\n";
-					}
-				}
-				std::cout << "voice " << voice_num << ":\n";
-				std::cout << "  rhythm: ";
-				pb.GetRhythmGesture().Print();
-				std::cout << "  pitch: ";
-				pb.GetPitchGesture().Print();
-				std::cout << "  velocity: ";
-				pb.GetVelocityGesture().Print();
-				std::cout << "  instrument: ";
-				pb.GetInstrumentGesture().Print();
-				std::cout << "  chord: ";
-				pb.GetChordGesture().Print();
-				std::cout << "  mute: " << pb.IsMuted() << "\n";
+		std::cout << "voice " << voice_num << ":\n";
+		std::cout << "  channel: " << voice.GetChannelNumber() << "\n";
+		std::cout << "  mute: " << voice.IsMuted() << "\n";
+		size_t pb_num = 0;
+		for (auto& pb : voice.m_param_blocks) {
+			std::cout << "  param block: " << pb_num << "\n";
+			int dur_ms = pb.GetDuration();
+			if (dur_ms > 0) {
+				float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
+				std::cout << "    duration: " << dur << " secs\n";
 			}
+			else {
+				std::cout << "    duration: " << "(looped)\n";
+			}
+			std::cout << "    rhythm: ";
+			pb.GetRhythmGesture().Print();
+			std::cout << "    pitch: ";
+			pb.GetPitchGesture().Print();
+			std::cout << "    velocity: ";
+			pb.GetVelocityGesture().Print();
+			std::cout << "    instrument: ";
+			pb.GetInstrumentGesture().Print();
+			std::cout << "    chord: ";
+			pb.GetChordGesture().Print();
+			++pb_num;
 		}
 		++voice_num;
 	}
+
 	return CommandParser::Result::Continue;
-}
-
-static CommandParser::Result cmdSection(const std::vector<std::string>& args)
-{
-	if (args.size() < 1) {
-		std::cerr << "Usage: section <section#>\n";
-		return CommandParser::Result::Continue;
-	}
-	const int section_num = tryGetInt(args[0], 0);
-	if (section_num >= kNumParamBlocks) {
-		std::cerr << "Invalid section number: " << section_num << "\n";
-		return CommandParser::Result::Continue;
-	}
-	g_current_section = section_num;
-	// Note: this section is not marked as active until a set command is used.
-
-	return CommandParser::Result::MaybeStart;
 }
 
 static CommandParser::Result cmdMute(const std::vector<std::string>& args)
 {
 	if (args.size() < 2) {
-		std::cerr << "Usage: mute <voice#> <1|0\n";
+		std::cerr << "Usage: mute <voice#> {1 | 0}\n";
 		return CommandParser::Result::Continue;
 	}
 	const int voice_num = tryGetInt(args[0], 0);
@@ -268,9 +186,10 @@ static CommandParser::Result cmdMute(const std::vector<std::string>& args)
 		std::cerr << "Invalid voice number: " << voice_num << "\n";
 		return CommandParser::Result::Continue;
 	}
-	const bool default_mute = g_piece[voice_num].m_param_blocks[g_current_section].IsMuted();
+	// move mute to voice. default mute is current mute. update voice thread to check
+	const bool default_mute = g_piece[voice_num].IsMuted();
 	const int new_mute = tryGetInt(args[1], default_mute);
-	g_piece[voice_num].m_param_blocks[g_current_section].SetIsMuted(new_mute);
+	g_piece[voice_num].SetIsMuted(new_mute);
 
 	return CommandParser::Result::MaybeStart;
 }
@@ -294,46 +213,44 @@ static CommandParser::Result cmdChannel(const std::vector<std::string>& args)
 
 static CommandParser::Result cmdDuration(const std::vector<std::string>& args)
 {
-	if (args.size() < 1) {
-		std::cerr << "Usage: duration <duration_sec>\n";
+	if (args.size() < 3) {
+		std::cerr << "Usage: duration <voice#> <param_block#> {<duration_float_sec> | 0}\n";
 		return CommandParser::Result::Continue;
 	}
-	const float duration = tryGetFloat(args[0], 0.0f);
+	const int voice_num = tryGetInt(args[0], 0);
+	if (voice_num >= g_piece.size()) {
+		std::cerr << "Invalid voice number: " << voice_num << "\n";
+		return CommandParser::Result::Continue;
+	}
+	const int pb_num = tryGetInt(args[1], 0);
+	if (pb_num >= g_piece[voice_num].m_param_blocks.size()) {
+		std::cerr << "Invalid param block number: " << pb_num << "\n";
+		return CommandParser::Result::Continue;
+	}
+	const float duration = tryGetFloat(args[2], 0.0f);
 	if (duration < 0.0f) {
 		std::cerr << "Invalid duration: " << duration << "\n";
 		return CommandParser::Result::Continue;
 	}
     const int duration_ms = static_cast<int>(duration * 1000.0f); // Convert seconds to milliseconds
-	setParamBlockDurations(duration_ms);
+    g_piece[voice_num].m_param_blocks[pb_num].SetDuration(duration_ms);
+
 	return CommandParser::Result::MaybeStart;
 }
 
-static CommandParser::Result cmdClear(const std::vector<std::string>& args)
+static CommandParser::Result cmdClear(const std::vector<std::string>&)
 {
-	if (args.size() < 1) {
-		std::cerr << "Usage: clear [all|section|voice#]\n";
+	std::cout << "Do you really want to clear the whole piece? (y/n): ";
+	std::string response;
+	std::getline(std::cin, response);
+	if (response.empty() ||
+		(response[0] != 'y' && response[0] != 'Y')) {
+		std::cout << "Piece not cleared.\n";
 		return CommandParser::Result::Continue;
 	}
-    if (args[0] == "all") {
-        g_piece = makeDefaultPiece();
-    }
-    else if (args[0] == "section") {
-        for (auto& voice : g_piece) {
-            voice.m_param_blocks[g_current_section].m_is_active = false;
-        }
-    }
-    else {
-        const int voice_num = tryGetInt(args[0], -1);
-        if (voice_num == -1) {
-            std::cerr << "Invalid voice number: " << args[0] << "\n";
-            return CommandParser::Result::Continue;
-        }
-        if (voice_num >= g_piece.size()) {
-            std::cerr << "Invalid voice number: " << voice_num << "\n";
-            return CommandParser::Result::Continue;
-        }
-        g_piece[voice_num] = makeDefaultVoice();
-    }
+	Piece p;
+	g_piece = p;
+
 	return CommandParser::Result::MaybeStart;
 }
 
@@ -342,7 +259,7 @@ static CommandParser::Result cmdLoad(const std::vector<std::string>& args)
 	namespace fs = std::filesystem;
 
 	if (args.size() < 1) {
-		std::cerr << "Usage: load <file_name>\n";
+		std::cerr << "Usage: load <file>\n";
 		return CommandParser::Result::Continue;
 	}
 	std::string file_name = args[0];
@@ -369,7 +286,7 @@ static CommandParser::Result cmdSave(const std::vector<std::string>& args)
 	namespace fs = std::filesystem;
 
 	if (args.size() < 1) {
-		std::cerr << "Usage: save <file_name>\n";
+		std::cerr << "Usage: save <file>\n";
 		return CommandParser::Result::Continue;
 	}
 	std::string file_name = args[0];
@@ -398,54 +315,78 @@ static CommandParser::Result cmdSave(const std::vector<std::string>& args)
 		return CommandParser::Result::Continue;
 	}
 
-	size_t voice_num = 0;
-	for (auto& voice : g_piece) {
-		if (voice.m_is_active) {
-            out << "# Voice " << voice_num << "\n";
-			out << "channel " << voice_num << " " << voice.GetChannelNumber() << "\n";
-			size_t pb_num = 0;
-			for (auto& pb : voice.m_param_blocks) {
-				if (pb.m_is_active) {
-                    out << "# Section " << pb_num << "\n";
-					out << "section " << pb_num << "\n";
-					int dur_ms = pb.GetDuration();
-					float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
-					out << "duration " << dur << "\n";
-					out << "set " << voice_num << " rhythm " << pb.GetRhythmGesture().Serialize() << "\n";
-					out << "set " << voice_num << " pitch " << pb.GetPitchGesture().Serialize() << "\n";
-					out << "set " << voice_num << " velocity " << pb.GetVelocityGesture().Serialize() << "\n";
-					out << "set " << voice_num << " instrument " << pb.GetInstrumentGesture().Serialize() << "\n";
-					out << "set " << voice_num << " chord " << pb.GetChordGesture().Serialize() << "\n";
-					std::string s{ pb.IsMuted() ? "1" : "0" };
-					out << "mute " << voice_num << " " << s << "\n";
-				}
-                ++pb_num;
-            }
-		}
-		++voice_num;
-	}
+	//size_t voice_num = 0;
+	//for (auto& voice : g_piece) {
+	//	if (voice.m_is_active) {
+ //           out << "# Voice " << voice_num << "\n";
+	//		out << "channel " << voice_num << " " << voice.GetChannelNumber() << "\n";
+	//		size_t pb_num = 0;
+	//		for (auto& pb : voice.m_param_blocks) {
+	//			if (pb.m_is_active) {
+ //                   out << "# Section " << pb_num << "\n";
+	//				out << "section " << pb_num << "\n";
+	//				int dur_ms = pb.GetDuration();
+	//				float dur = static_cast<float>(dur_ms) / 1000.0f; // Convert milliseconds to seconds
+	//				out << "duration " << dur << "\n";
+	//				out << "set " << voice_num << " rhythm " << pb.GetRhythmGesture().Serialize() << "\n";
+	//				out << "set " << voice_num << " pitch " << pb.GetPitchGesture().Serialize() << "\n";
+	//				out << "set " << voice_num << " velocity " << pb.GetVelocityGesture().Serialize() << "\n";
+	//				out << "set " << voice_num << " instrument " << pb.GetInstrumentGesture().Serialize() << "\n";
+	//				out << "set " << voice_num << " chord " << pb.GetChordGesture().Serialize() << "\n";
+	//				std::string s{ pb.IsMuted() ? "1" : "0" };
+	//				out << "mute " << voice_num << " " << s << "\n";
+	//			}
+ //               ++pb_num;
+ //           }
+	//	}
+	//	++voice_num;
+	//}
 
 	std::cout << "Saved.\n";
 	return CommandParser::Result::Continue;
+}
+
+static CommandParser::Result cmdAdd(const std::vector<std::string>& args)
+{
+	if (args.size() == 1 && args[0] == "voice") {
+		Voice v = makeDefaultVoice();
+		g_piece.push_back(v);
+		size_t new_voice_num = g_piece.size() - 1;
+		std::cout << "Added voice " << new_voice_num << "\n";
+		std::cout << "Added param block " << v.m_param_blocks.size() - 1 << "\n";
+	}
+	else if (args.size() == 2 && args[0] == "param_block") {
+		const int voice_num = tryGetInt(args[1], 0);
+		if (voice_num >= g_piece.size()) {
+			std::cerr << "Invalid voice number: " << voice_num << "\n";
+			return CommandParser::Result::Continue;
+		}
+		g_piece[voice_num].AddParamBlock(makeDefaultParamBlock());
+	}
+	else {
+		std::cerr << "Usage: add {voice | param_block <voice#>}\n";
+		return CommandParser::Result::Continue;
+	}
+
+    return CommandParser::Result::MaybeStart;
 }
 
 static CommandParser::Result cmdHelp(const std::vector<std::string>&)
 {
     std::cout << "Available commands:\n";
     std::cout << "  help\n";
-	std::cout << "  quit\n";
-	std::cout << "  set <voice#> <param_name> <param_value,param_value...>\n";
+	std::cout << "  {quit | exit}\n";
+    std::cout << "  add {voice | param_block <voice#>}\n";
+	std::cout << "  set <voice#> <param_block#> <param_name> <param_value,>...\n";
 	std::cout << "  autosubmit\n";
-	std::cout << "  submit\n";
 	std::cout << "  stop\n";
-	std::cout << "  start\n";
-	std::cout << "  show [voice#]\n";
-	std::cout << "  mute <voice#> <1|0\n";
-	std::cout << "  load <file_name>\n";
-	std::cout << "  save <file_name>\n";
-	std::cout << "  section <section#>\n";
-	std::cout << "  duration <duration_float_sec|0>\n";
-	std::cout << "  clear [all|section|voice#]\n";
+	std::cout << "  {start | submit | play}\n";
+	std::cout << "  show\n";
+	std::cout << "  mute <voice#> {1 | 0}\n";
+	std::cout << "  load <file>\n";
+	std::cout << "  save <file>\n";
+	std::cout << "  duration <voice#> <param_block#> {<duration_float_sec> | 0}\n";
+	std::cout << "  clear\n";
 	std::cout << "  channel <voice#> <chan#>\n";
 
 	return CommandParser::Result::Continue;
@@ -468,18 +409,19 @@ static CommandParser::Result cmdStart(const std::vector<std::string>&)
 
 static void init_parser(CommandParser& parser)
 {
+	parser.registerCommand("add", cmdAdd);
 	parser.registerCommand("set", cmdSet);
 	parser.registerCommand("help", cmdHelp);
 	parser.registerCommand("quit", cmdQuit);
-	parser.registerCommand("exit", cmdQuit);
+    parser.registerCommand("exit", cmdQuit);		// alias for quit
 	parser.registerCommand("stop", cmdStop);
 	parser.registerCommand("start", cmdStart);
-	parser.registerCommand("submit", cmdStart);
+    parser.registerCommand("submit", cmdStart);		// alias for start
+	parser.registerCommand("play", cmdStart);		// alias for start
 	parser.registerCommand("show", cmdShow);
 	parser.registerCommand("mute", cmdMute);
 	parser.registerCommand("load", cmdLoad);
 	parser.registerCommand("save", cmdSave);
-	parser.registerCommand("section", cmdSection);
 	parser.registerCommand("duration", cmdDuration);
 	parser.registerCommand("clear", cmdClear);
 	parser.registerCommand("channel", cmdChannel);
@@ -494,10 +436,9 @@ int run_parser()
 {
     CommandParser parser;
 	init_parser(parser);
-	g_piece = makeDefaultPiece();
 
 	Piece p;
-	Scheduler* s = nullptr;
+	Scheduler* s = new Scheduler;
 	std::thread play_thread;
 	bool is_running = false;
 
@@ -513,7 +454,6 @@ int run_parser()
 		if (is_running) {
 			s->SetStop();
 			play_thread.join();
-			std::cout << "Piece done.\n";
 			is_running = false;
 		}
 	};
@@ -544,12 +484,12 @@ int run_parser()
 		}
 		if (result == CommandParser::Result::Start) {
 			stop_if_running(s, play_thread, is_running);
-			if (isPieceEmpty(g_piece)) {
+			if (g_piece.empty()) {
 				std::cerr << "No voices in the piece. Add voices before starting.\n";
 				continue;
 			} else {
 				// Copy modified piece to the piece to play and start the new piece.
-				p = makePlayablePiece();
+				p = g_piece;
 				delete s;
                 s = new Scheduler();
 				play_thread = std::thread(play_rt_piece, std::ref(*s), std::ref(p));

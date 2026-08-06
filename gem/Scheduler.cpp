@@ -104,11 +104,6 @@ void Scheduler::Play(int channel_num, ParamBlock param_block) const
 
 	while (total_dur < max_dur && !stop)
 	{
-		if (param_block.IsMuted()) {
-			sleep_for(milliseconds(500));
-			continue;
-		}
-
 		auto dur = rhythm_gesture.Next(rhythm_index);
 		auto absdur = abs(dur);
 		if (dur <= 0)
@@ -156,7 +151,7 @@ void Scheduler::Play(int channel_num, ParamBlock param_block) const
 	// Let things settle
 	//sleep_for(milliseconds(1000));
 
-	cout << "Channel " << channel_num << " done\n";
+	//cout << "Channel " << channel_num << " done\n";
 }
 
 // Voice thread.
@@ -183,6 +178,10 @@ void Scheduler::Play(Piece piece) const
 	[[maybe_unused]] int i{ 0 };
 	for (auto v : piece)
 	{
+		if (v.IsMuted()) {
+			continue;
+		}
+
 		//cout << "Starting voice " << i++ << "\n";
 
 		// Get address of overloaded const member function Play(voice)
