@@ -29,4 +29,63 @@
 
 #pragma once
 
-int run_parser();
+#include <string>
+#include <vector>
+
+bool ParseAddBlock(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice);
+
+bool ParseSetRhythm(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& block,
+    std::vector<int>& values);
+
+bool ParseSetPitch(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& block,
+    std::vector<int>& values);
+
+bool ParseSetVelocity(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& block,
+    std::vector<int>& values);
+
+bool ParseSetChord(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& block,
+    std::vector<int>& values);
+
+bool ParseSetAutosubmit(
+    int argc,
+    const std::vector<std::string>& argv,
+    bool& enabled);
+
+bool ParseSetMute(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    bool& mute);
+
+bool ParseSetDuration(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& block,
+    float& seconds,
+    bool& loop);
+
+bool ParseSetChannel(
+    int argc,
+    const std::vector<std::string>& argv,
+    int& voice,
+    int& channel);
